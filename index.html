@@ -1,398 +1,638 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="tr" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cvassylo - Ultimate Arcade Mini Oyun Salonu</title>
+    <title>cvassylo Sandbox</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        cyber: {
+                            dark: '#0a0a10',
+                            panel: '#12131e',
+                            border: '#2a2d45',
+                            cyan: '#00f3ff',
+                            magenta: '#ff0055',
+                            gold: '#ffd700'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root {
-            --bg-color: #0b0e14;
-            --card-bg: #151922;
-            --accent: #00ffcc;
-            --accent-hover: #00cca3;
-            --text: #ffffff;
-            --subtext: #8a99ad;
-            --border: #232a3b;
+        body {
+            background-color: #0a0a10;
+            color: #e2e8f0;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            overflow: hidden;
+            touch-action: none;
+            user-select: none;
         }
 
-        .light-theme {
-            --bg-color: #f0f2f5;
-            --card-bg: #ffffff;
-            --accent: #0066ff;
-            --accent-hover: #0052cc;
-            --text: #1a1a1a;
-            --subtext: #666666;
-            --border: #e0e0e0;
+        /* Neon Glow Effects */
+        .neon-title {
+            text-shadow: 0 0 10px rgba(0, 243, 255, 0.7),
+                         0 0 20px rgba(0, 243, 255, 0.4);
         }
 
-        * { 
-            box-sizing: border-box; 
-            margin: 0; 
-            padding: 0; 
-            font-family: 'Segoe UI', Tahoma, sans-serif; 
-            transition: background 0.3s, color 0.3s; 
-        }
-        
-        body { 
-            background-color: var(--bg-color); 
-            color: var(--text); 
-            padding: 20px; 
-            min-height: 100vh; 
+        .neon-box {
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.15),
+                        inset 0 0 15px rgba(0, 243, 255, 0.05);
         }
 
-        header { 
-            text-align: center; 
-            padding: 20px 0 30px; 
-            position: relative; 
-        }
-        
-        header h1 { 
-            font-size: 3.2rem; 
-            color: var(--accent); 
-            text-shadow: 0 0 15px rgba(0,255,204,0.4); 
-            letter-spacing: 2px; 
-        }
-        
-        header p { 
-            color: var(--subtext); 
-            margin-top: 5px; 
-            font-size: 1.1rem; 
-        }
-        
-        .controls-bar {
-            max-width: 1200px;
-            margin: 20px auto;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--card-bg);
-            padding: 15px 20px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
+        .mat-btn {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .search-box { 
-            flex: 1; 
-            min-width: 200px; 
-        }
-        
-        .search-box input {
-            width: 100%; 
-            padding: 10px 15px; 
-            border-radius: 8px; 
-            border: 1px solid var(--border);
-            background: var(--bg-color); 
-            color: var(--text); 
-            font-size: 1rem;
+        .mat-btn.active {
+            transform: scale(1.05);
+            box-shadow: 0 0 12px var(--btn-color);
+            border-color: var(--btn-color);
         }
 
-        .filter-btn, .action-btn {
-            background: var(--bg-color); 
-            color: var(--text); 
-            border: 1px solid var(--border);
-            padding: 9px 16px; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            font-weight: bold;
+        /* Custom Scrollbar for side panel if needed */
+        ::-webkit-scrollbar {
+            width: 4px;
         }
-        
-        .filter-btn.active, .action-btn:hover { 
-            background: var(--accent); 
-            color: #000; 
-            border-color: var(--accent); 
+        ::-webkit-scrollbar-track {
+            background: #0a0a10;
         }
-
-        .container {
-            max-width: 1200px; 
-            margin: 0 auto;
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-            gap: 20px; 
-            padding: 10px 0;
-        }
-
-        .game-card {
-            background: var(--card-bg); 
-            border-radius: 12px; 
-            border: 1px solid var(--border);
-            padding: 20px; 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: space-between;
-            position: relative; 
-            overflow: hidden; 
-            height: 220px;
-        }
-        
-        .game-card:hover { 
-            transform: translateY(-5px); 
-            border-color: var(--accent); 
-            box-shadow: 0 8px 20px rgba(0,0,0,0.4); 
-        }
-        
-        .game-card h3 { 
-            font-size: 1.2rem; 
-            margin-bottom: 6px; 
-        }
-        
-        .game-card p { 
-            color: var(--subtext); 
-            font-size: 0.85rem; 
-            line-height: 1.3; 
-        }
-        
-        .badge { 
-            position: absolute; 
-            top: 12px; 
-            right: 12px; 
-            font-size: 0.7rem; 
-            padding: 3px 8px; 
-            border-radius: 20px; 
-            background: var(--accent); 
-            color: #000; 
-            font-weight: bold; 
-        }
-
-        .card-footer { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-top: 15px; 
-        }
-        
-        .play-btn { 
-            background: var(--accent); 
-            color: #000; 
-            padding: 8px 16px; 
-            border-radius: 6px; 
-            font-weight: bold; 
-            border: none; 
-            cursor: pointer; 
-        }
-        
-        .play-btn:hover { 
-            background: var(--accent-hover); 
-        }
-        
-        .like-btn { 
-            background: transparent; 
-            border: none; 
-            cursor: pointer; 
-            font-size: 1.2rem; 
-            color: var(--subtext); 
-        }
-
-        #game-modal { 
-            display: none; 
-            position: fixed; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
-            background: rgba(0,0,0,0.9); 
-            justify-content: center; 
-            align-items: center; 
-            z-index: 999; 
-        }
-        
-        .modal-content { 
-            background: var(--card-bg); 
-            padding: 30px; 
-            border-radius: 16px; 
-            border: 2px solid var(--accent); 
-            max-width: 500px; 
-            width: 90%; 
-            text-align: center; 
-            position: relative; 
-        }
-        
-        .close-modal { 
-            position: absolute; 
-            top: 15px; 
-            right: 15px; 
-            background: #ff4757; 
-            color: #fff; 
-            border: none; 
-            padding: 6px 12px; 
-            border-radius: 6px; 
-            cursor: pointer; 
-            font-weight: bold; 
-        }
-        
-        .stats-panel { 
-            max-width: 1200px; 
-            margin: 20px auto; 
-            text-align: center; 
-            color: var(--subtext); 
-            font-size: 0.9rem; 
+        ::-webkit-scrollbar-thumb {
+            background: #2a2d45;
+            border-radius: 2px;
         }
     </style>
 </head>
-<body>
+<body class="flex flex-col h-screen w-screen relative select-none">
 
-    <header>
-        <h1>CVASSYLO</h1>
-        <p>30 Çılgın Mini Oyun & Devasa Eğlence Portalı</p>
+    <!-- Header / Navbar -->
+    <header class="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-4 py-3 bg-cyber-panel/80 backdrop-blur-md border-b border-cyber-border">
+        <div class="flex items-center gap-3">
+            <i class="fa-solid font-bold text-cyber-cyan text-xl fa-flask animate-pulse"></i>
+            <h1 class="text-xl md:text-2xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyber-cyan via-blue-400 to-cyber-magenta neon-title uppercase">
+                cvassylo <span class="text-xs font-semibold px-2 py-0.5 rounded border border-cyber-cyan text-cyber-cyan ml-1">SANDBOX</span>
+            </h1>
+        </div>
+
+        <!-- System Metrics Display -->
+        <div class="flex items-center gap-4 text-xs font-mono text-gray-400 bg-cyber-dark/60 px-3 py-1.5 rounded-lg border border-cyber-border">
+            <div>FPS: <span id="fps-counter" class="text-cyber-cyan font-bold">60</span></div>
+            <div class="hidden sm:block">|</div>
+            <div class="hidden sm:block">Parçacık: <span id="particle-counter" class="text-cyber-gold font-bold">0</span></div>
+        </div>
     </header>
 
-    <div class="controls-bar">
-        <div class="search-box">
-            <input type="text" id="searchInput" placeholder="Oyun ara..." onkeyup="filterGames()">
+    <!-- Main Canvas Area -->
+    <main class="relative flex-1 w-full h-full overflow-hidden">
+        <canvas id="sandboxCanvas" class="w-full h-full block cursor-crosshair"></canvas>
+    </main>
+
+    <!-- Floating UI Controls Panel (Bottom Overlay) -->
+    <div class="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 w-[95%] max-w-4xl bg-cyber-panel/90 backdrop-blur-lg border border-cyber-border p-3 md:p-4 rounded-2xl neon-box flex flex-col md:flex-row items-center gap-4">
+        
+        <!-- Element Selector Grid -->
+        <div class="flex flex-wrap items-center justify-center gap-2 flex-1 w-full" id="element-buttons">
+            <!-- Dynamic elements will be inserted via JS or defined here -->
+            <button data-type="1" class="mat-btn active px-3 py-2 rounded-xl border border-yellow-500/30 bg-yellow-950/40 text-yellow-400 text-xs font-medium flex items-center gap-1.5" style="--btn-color: #ffd700;">
+                <i class="fa-solid fa-cubes-stacked"></i> Kum
+            </button>
+            <button data-type="2" class="mat-btn px-3 py-2 rounded-xl border border-cyan-500/30 bg-cyan-950/40 text-cyan-400 text-xs font-medium flex items-center gap-1.5" style="--btn-color: #00f3ff;">
+                <i class="fa-solid fa-droplet"></i> Su
+            </button>
+            <button data-type="3" class="mat-btn px-3 py-2 rounded-xl border border-orange-500/30 bg-orange-950/40 text-orange-400 text-xs font-medium flex items-center gap-1.5" style="--btn-color: #ff5500;">
+                <i class="fa-solid fa-fire"></i> Ateş
+            </button>
+            <button data-type="4" class="mat-btn px-3 py-2 rounded-xl border border-amber-800/30 bg-amber-950/40 text-amber-500 text-xs font-medium flex items-center gap-1.5" style="--btn-color: #8b5a2b;">
+                <i class="fa-solid fa-tree"></i> Odun
+            </button>
+            <button data-type="5" class="mat-btn px-3 py-2 rounded-xl border border-slate-500/30 bg-slate-800/40 text-slate-300 text-xs font-medium flex items-center gap-1.5" style="--btn-color: #808080;">
+                <i class="fa-solid fa-square"></i> Taş
+            </button>
+            <button data-type="6" class="mat-btn px-3 py-2 rounded-xl border border-green-500/30 bg-green-950/40 text-green-400 text-xs font-medium flex items-center gap-1.5" style="--btn-color: #39ff14;">
+                <i class="fa-solid fa-vial-virus"></i> Asit
+            </button>
+            <button data-type="7" class="mat-btn px-3 py-2 rounded-xl border border-purple-500/30 bg-purple-950/40 text-purple-400 text-xs font-medium flex items-center gap-1.5" style="--btn-color: #a855f7;">
+                <i class="fa-solid fa-gas-pump"></i> Petrol
+            </button>
+            <button data-type="0" class="mat-btn px-3 py-2 rounded-xl border border-red-500/30 bg-red-950/40 text-red-400 text-xs font-medium flex items-center gap-1.5" style="--btn-color: #ff0055;">
+                <i class="fa-solid fa-eraser"></i> Silgi
+            </button>
+            <button data-type="wind" class="mat-btn px-3 py-2 rounded-xl border border-indigo-500/30 bg-indigo-950/40 text-indigo-300 text-xs font-medium flex items-center gap-1.5" style="--btn-color: #6366f1;">
+                <i class="fa-solid fa-wind"></i> Rüzgar/Patlama
+            </button>
         </div>
-        <div>
-            <button class="filter-btn active" onclick="setFilter('all')">Tümü (30)</button>
-            <button class="filter-btn" onclick="setFilter('action')">Aksiyon</button>
-            <button class="filter-btn" onclick="setFilter('brain')">Zeka</button>
-            <button class="filter-btn" onclick="setFilter('luck')">Şans</button>
-        </div>
-        <div>
-            <button class="action-btn" onclick="playRandom()">🎲 Rastgele Oyun</button>
-            <button class="action-btn" onclick="toggleTheme()">🌓 Tema</button>
+
+        <div class="h-px md:h-8 w-full md:w-px bg-cyber-border"></div>
+
+        <!-- Controls: Brush Size & Gravity & Reset -->
+        <div class="flex items-center justify-between md:justify-end gap-3 w-full md:w-auto">
+            
+            <!-- Brush Size -->
+            <div class="flex items-center gap-2 bg-cyber-dark/80 px-3 py-1.5 rounded-xl border border-cyber-border">
+                <i class="fa-solid fa-circle-dot text-xs text-gray-400"></i>
+                <input type="range" id="brushSize" min="1" max="15" value="4" class="w-20 accent-cyber-cyan cursor-pointer">
+                <span id="brushSizeVal" class="text-xs font-mono text-cyber-cyan w-4">4</span>
+            </div>
+
+            <!-- Gravity Toggle -->
+            <button id="btn-gravity" class="px-3 py-2 rounded-xl bg-cyber-dark border border-cyber-border hover:border-cyber-cyan text-xs font-medium text-gray-300 flex items-center gap-1.5 transition-all">
+                <i class="fa-solid fa-arrow-down text-cyber-cyan" id="grav-icon"></i>
+                <span id="grav-label" class="hidden sm:inline">Normal</span>
+            </button>
+
+            <!-- Clear Canvas -->
+            <button id="btn-clear" class="px-3 py-2 rounded-xl bg-red-950/40 border border-red-500/40 hover:bg-red-900/60 text-xs font-medium text-red-300 flex items-center gap-1.5 transition-all">
+                <i class="fa-solid fa-trash-can"></i>
+                <span class="hidden sm:inline">Temizle</span>
+            </button>
         </div>
     </div>
 
-    <div class="container" id="gamesGrid"></div>
-
-    <div class="stats-panel">
-        <span id="totalPlayed">Toplam Oynanma: 0</span> | <span id="totalScore">Kazanılan Puan: 0</span> | <span>Sürüm: v2.0 Poki Edition</span>
-    </div>
-
-    <div id="game-modal">
-        <div class="modal-content">
-            <button class="close-modal" onclick="closeGame()">X Kapat</button>
-            <div id="modalBody"></div>
-        </div>
-    </div>
-
+    <!-- Simulation Script Logic -->
     <script>
-        const games = [
-            { id: 1, title: "Hızlı Tıklayıcı", cat: "action", tag: "POPÜLER", desc: "5 saniyede kaç defa basabilirsin?" },
-            { id: 2, title: "Renk Bulmaca", cat: "brain", tag: "ZOR", desc: "Hedef rengi en hızlı şekilde seç." },
-            { id: 3, title: "Şans Kutusu", cat: "luck", tag: "ŞANS", desc: "Altın dolu gizli kutuyu yakala." },
-            { id: 4, title: "Sayı Tahmin", cat: "brain", tag: "KLASİK", desc: "Aklımdan tuttuğum 1-20 arası sayıyı bul." },
-            { id: 5, title: "Taş Kağıt Makas", cat: "action", tag: "POPÜLER", desc: "Yapay zekayı Taş-Kağıt-Makas ile yen." },
-            { id: 6, title: "Şans Zarı", cat: "luck", tag: "YENİ", desc: "Zarları at, rakibinden daha yüksek getir." },
-            { id: 7, title: "Matematik Canavarı", cat: "brain", tag: "EĞİTİM", desc: "Hızlı toplama işlemlerine cevap ver." },
-            { id: 8, title: "Yazı Tura", cat: "luck", tag: "KOLAY", desc: "Parayı fırlat, doğru yüzü tahmin et." },
-            { id: 9, title: "Hafıza Kartı", cat: "brain", tag: "BEĞENİLEN", desc: "Saklanan renk çiftlerini bulup eşleştir." },
-            { id: 10, title: "Tepki Ölçer", cat: "action", tag: "REFLEKS", desc: "Ekran yeşile döndüğü milisaniyede tıkla!" },
-            { id: 11, title: "Kelime Tahmin", cat: "brain", tag: "YENİ", desc: "Karışık harflerden doğru kelimeyi çıkar." },
-            { id: 12, title: "Süratli Yazı", cat: "action", tag: "YENİ", desc: "Ekranda çıkan kelimeyi 3 saniyede yaz." },
-            { id: 13, title: "Mayın Tarlası Mini", cat: "brain", tag: "TBR", desc: "Mayına basmadan güvenli bölgeyi seç." },
-            { id: 14, title: "Renk Karıştırma", cat: "brain", tag: "YENİ", desc: "İki ana rengin karışımını doğru tahmin et." },
-            { id: 15, title: "Çarpım Tablosu", cat: "brain", tag: "ZEKA", desc: "Rastgele gelen çarpma sorularını çöz." },
-            { id: 16, title: "Para Katlama Slot", cat: "luck", tag: "SLOT", desc: "3 aynı simgeyi yan yana getir, skoru patlat." },
-            { id: 17, title: "Refleks Balonu", cat: "action", tag: "HIZLI", desc: "Patlayan balonlara kaçırmadan tıkla." },
-            { id: 18, title: "Hangi Sayı Büyük?", cat: "brain", tag: "KOLAY", desc: "İki işlemden hangisinin sonucu büyük?" },
-            { id: 19, title: "Ters Kelime", cat: "brain", tag: "ZOR", desc: "Ters yazılan kelimenin doğrusunu bul." },
-            { id: 20, title: "Kart Çekmece", cat: "luck", tag: "ŞANS", desc: "Daha yüksek değerli kartı çeken kazanır." },
-            { id: 21, title: "Tam 5 Saniye", cat: "action", tag: "ZAMAN", desc: "Tam olarak 5.00. saniyede durdurabilir misin?" },
-            { id: 22, title: "Labirent Çıkışı", cat: "brain", tag: "BULMACA", desc: "Doğru kapıyı seçerek labirentten çık." },
-            { id: 23, title: "Bayrak Tahmin", cat: "brain", tag: "BİLGİ", desc: "Gösterilen başkentin hangi ülkeye ait olduğunu bul." },
-            { id: 24, title: "Pixel Avı", cat: "action", tag: "DİKKAT", desc: "Ekranın neresinde belirdiğini görüp tıkla." },
-            { id: 25, title: "Emoji Eşleştir", cat: "brain", tag: "EĞLENCE", desc: "Aynı iki emojiyi aynı anda aç." },
-            { id: 26, title: "Tiz mi Bas mı?", cat: "brain", tag: "SES", desc: "Sayısal frekansı yüksek olan sesi bul." },
-            { id: 27, title: "Tek mi Çift mi?", cat: "luck", tag: "KOLAY", desc: "Gelen rastgele sayı tek mi çift mi?" },
-            { id: 28, title: "Ritm Yakalama", cat: "action", tag: "MÜZİK", desc: "Çember tam hizada kesişince tuşa bas." },
-            { id: 29, title: "Renk-Yazı Tuzağı", cat: "brain", tag: "ODAK", desc: "Yazının anlamına değil, RENGİNE tıkla!" },
-            { id: 30, title: "Zaman Çarkı", cat: "luck", tag: "ÇARK", desc: "Şans çarkını çevir ve büyük ikramiyeyi al." }
-        ];
+        window.onload = function() {
+            const canvas = document.getElementById('sandboxCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Grid and Dimensions
+            const CELL_SIZE = 4; // Size of each pixel cell
+            let cols = 0;
+            let rows = 0;
+            let grid = [];
+            let nextGrid = [];
 
-        let totalP = 0, totalS = 0;
+            // UI Elements
+            const fpsCounter = document.getElementById('fps-counter');
+            const particleCounter = document.getElementById('particle-counter');
+            const brushSizeInput = document.getElementById('brushSize');
+            const brushSizeVal = document.getElementById('brushSizeVal');
+            const elementButtons = document.querySelectorAll('.mat-btn');
+            const btnGravity = document.getElementById('btn-gravity');
+            const gravIcon = document.getElementById('grav-icon');
+            const gravLabel = document.getElementById('grav-label');
+            const btnClear = document.getElementById('btn-clear');
 
-        function renderGames(list) {
-            const grid = document.getElementById('gamesGrid');
-            grid.innerHTML = '';
-            list.forEach(g => {
-                grid.innerHTML += `
-                    <div class="game-card">
-                        <span class="badge">${g.tag}</span>
-                        <div>
-                            <h3>${g.title}</h3>
-                            <p>${g.desc}</p>
-                        </div>
-                        <div class="card-footer">
-                            <button class="play-btn" onclick="playGame(${g.id})">Oyna</button>
-                            <button class="like-btn" onclick="this.style.color='#ff4757'">♥</button>
-                        </div>
-                    </div>
-                `;
-            });
-        }
+            // State variables
+            let selectedType = 1; // Default: Sand
+            let brushSize = parseInt(brushSizeInput.value);
+            let isMouseDown = false;
+            let mouseX = 0;
+            let mouseY = 0;
+            let gravityMode = 0; // 0: Normal, 1: Inverted, 2: Zero Gravity
+            let activeParticlesCount = 0;
 
-        function filterGames() {
-            const q = document.getElementById('searchInput').value.toLowerCase();
-            renderGames(games.filter(g => g.title.toLowerCase().includes(q) || g.desc.toLowerCase().includes(q)));
-        }
+            // Frame timing
+            let lastTime = performance.now();
+            let frameCount = 0;
+            let fps = 60;
 
-        function setFilter(cat) {
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
-            if(cat === 'all') renderGames(games);
-            else renderGames(games.filter(g => g.cat === cat));
-        }
+            // Element Types Definition
+            // 0: EMPTY, 1: SAND, 2: WATER, 3: FIRE, 4: WOOD, 5: STONE, 6: ACID, 7: OIL
+            const TYPE_EMPTY = 0;
+            const TYPE_SAND = 1;
+            const TYPE_WATER = 2;
+            const TYPE_FIRE = 3;
+            const TYPE_WOOD = 4;
+            const TYPE_STONE = 5;
+            const TYPE_ACID = 6;
+            const TYPE_OIL = 7;
+            const TYPE_WIND = 'wind';
 
-        function toggleTheme() { 
-            document.body.classList.toggle('light-theme'); 
-        }
-        
-        function playRandom() { 
-            playGame(Math.floor(Math.random() * games.length) + 1); 
-        }
-        
-        function closeGame() { 
-            document.getElementById('game-modal').style.display = 'none'; 
-        }
+            // Element Palette & Properties
+            const ELEMENT_SPECS = {
+                [TYPE_EMPTY]: { color: [10, 10, 16], name: 'Boş' },
+                [TYPE_SAND]:  { color: [255, 215, 0], variance: 20, name: 'Kum' },
+                [TYPE_WATER]: { color: [0, 243, 255], variance: 30, name: 'Su' },
+                [TYPE_FIRE]:  { color: [255, 85, 0],  variance: 40, lifetime: 25, name: 'Ateş' },
+                [TYPE_WOOD]:  { color: [139, 90, 43], variance: 15, name: 'Odun' },
+                [TYPE_STONE]: { color: [128, 128, 128], variance: 10, name: 'Taş' },
+                [TYPE_ACID]:  { color: [57, 255, 20], variance: 25, name: 'Asit' },
+                [TYPE_OIL]:   { color: [168, 85, 247], variance: 20, name: 'Petrol' }
+            };
 
-        function playGame(id) {
-            totalP++;
-            document.getElementById('totalPlayed').innerText = "Toplam Oynanma: " + totalP;
-            const modal = document.getElementById('game-modal');
-            const body = document.getElementById('modalBody');
-            modal.style.display = 'flex';
+            // Canvas & Grid Initialization
+            function initGrid() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                
+                cols = Math.floor(canvas.width / CELL_SIZE);
+                rows = Math.floor(canvas.height / CELL_SIZE);
 
-            if(id === 1) {
-                let score = 0, time = 5;
-                body.innerHTML = `<h3>Hızlı Tıklayıcı</h3><p style="margin:15px;">Süre: <b id="t">5</b> | Skor: <b id="s">0</b></p><button class="play-btn" id="btn" style="padding:15px 30px;">TIKLA!</button>`;
-                let b = document.getElementById('btn');
-                b.onclick = () => { score++; document.getElementById('s').innerText = score; };
-                let tm = setInterval(() => {
-                    time--; document.getElementById('t').innerText = time;
-                    if(time <= 0) { clearInterval(tm); b.disabled = true; b.innerText = "Bitti!"; addScore(score); }
-                }, 1000);
-            } else if(id === 5) {
-                body.innerHTML = `<h3>Taş Kağıt Makas</h3><div style="margin:20px 0;"><button class="play-btn" onclick="tkm('Taş')">✊ Taş</button> <button class="play-btn" onclick="tkm('Kağıt')">✋ Kağıt</button> <button class="play-btn" onclick="tkm('Makas')">✌️ Makas</button></div><div id="res"></div>`;
-            } else if(id === 21) {
-                let start = Date.now();
-                body.innerHTML = `<h3>Tam 5.00 Saniyede Durdur!</h3><p style="margin:20px 0;">Butona bastığın an sayac başlar, 5.00 sn olduğunu düşündüğünde tekrar bas!</p><button class="play-btn" id="sbtn">DURDUR!</button><h2 id="sres" style="margin-top:15px;"></h2>`;
-                document.getElementById('sbtn').onclick = () => {
-                    let diff = ((Date.now() - start) / 1000).toFixed(2);
-                    document.getElementById('sres').innerText = diff + " Saniye!";
-                    addScore(Math.abs(5 - diff) < 0.2 ? 100 : 10);
-                };
-            } else {
-                body.innerHTML = `<h3>${games[id-1].title}</h3><p style="margin:20px 0;">Oyun Başlatıldı! Oyna ve skor kazan.</p><button class="play-btn" onclick="addScore(50); closeGame();">Kazan (50 Puan)</button>`;
+                grid = new Array(cols * rows).fill(0).map(() => createCell(TYPE_EMPTY));
+                nextGrid = new Array(cols * rows).fill(0).map(() => createCell(TYPE_EMPTY));
             }
-        }
 
-        function tkm(user) {
-            let opts = ['Taş', 'Kağıt', 'Makas'];
-            let bot = opts[Math.floor(Math.random()*3)];
-            let res = document.getElementById('res');
-            if(user === bot) res.innerText = "Berabere! Bot da " + bot + " yaptı.";
-            else if((user==='Taş'&&bot==='Makas')||(user==='Kağıt'&&bot==='Taş')||(user==='Makas'&&bot==='Kağıt')) {
-                res.innerText = "KAZANDIN! Bot: " + bot; addScore(30);
-            } else res.innerText = "Kaybettin! Bot: " + bot;
-        }
+            function createCell(type, extraProps = {}) {
+                if (type === TYPE_EMPTY) return { type: TYPE_EMPTY, color: ELEMENT_SPECS[TYPE_EMPTY].color };
 
-        function addScore(pts) {
-            totalS += pts;
-            document.getElementById('totalScore').innerText = "Kazanılan Puan: " + totalS;
-        }
+                const spec = ELEMENT_SPECS[type];
+                let color = [...spec.color];
 
-        renderGames(games);
+                // Add slight color variance for realism
+                if (spec.variance) {
+                    const v = (Math.random() - 0.5) * spec.variance;
+                    color[0] = Math.min(255, Math.max(0, color[0] + v));
+                    color[1] = Math.min(255, Math.max(0, color[1] + v));
+                    color[2] = Math.min(255, Math.max(0, color[2] + v));
+                }
+
+                return {
+                    type: type,
+                    color: color,
+                    life: spec.lifetime || 0,
+                    modified: false,
+                    ...extraProps
+                };
+            }
+
+            function getIndex(x, y) {
+                if (x < 0 || x >= cols || y < 0 || y >= rows) return -1;
+                return x + y * cols;
+            }
+
+            // Window Resize Handling
+            window.addEventListener('resize', () => {
+                initGrid();
+            });
+
+            // Input Handling (Mouse / Touch)
+            function updateMousePos(e) {
+                const rect = canvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                mouseX = Math.floor((clientX - rect.left) / CELL_SIZE);
+                mouseY = Math.floor((clientY - rect.top) / CELL_SIZE);
+            }
+
+            canvas.addEventListener('mousedown', (e) => {
+                isMouseDown = true;
+                updateMousePos(e);
+                spawnParticles();
+            });
+
+            canvas.addEventListener('mousemove', (e) => {
+                updateMousePos(e);
+                if (isMouseDown) spawnParticles();
+            });
+
+            window.addEventListener('mouseup', () => isMouseDown = false);
+
+            canvas.addEventListener('touchstart', (e) => {
+                isMouseDown = true;
+                updateMousePos(e);
+                spawnParticles();
+            }, { passive: true });
+
+            canvas.addEventListener('touchmove', (e) => {
+                updateMousePos(e);
+                if (isMouseDown) spawnParticles();
+            }, { passive: true });
+
+            window.addEventListener('touchend', () => isMouseDown = false);
+
+            // Spawn Particles inside Brush Radius
+            function spawnParticles() {
+                const radius = brushSize;
+                for (let dx = -radius; dx <= radius; dx++) {
+                    for (let dy = -radius; dy <= radius; dy++) {
+                        if (dx * dx + dy * dy <= radius * radius) {
+                            const gx = mouseX + dx;
+                            const gy = mouseY + dy;
+                            const idx = getIndex(gx, gy);
+
+                            if (idx !== -1) {
+                                if (selectedType === TYPE_WIND) {
+                                    // Apply explosion force
+                                    applyWindForce(gx, gy, dx, dy);
+                                } else {
+                                    // Spawn selected element (or erase)
+                                    if (selectedType === TYPE_EMPTY || Math.random() < 0.75) {
+                                        grid[idx] = createCell(selectedType);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            function applyWindForce(x, y, dx, dy) {
+                const idx = getIndex(x, y);
+                if (idx !== -1 && grid[idx].type !== TYPE_EMPTY && grid[idx].type !== TYPE_STONE) {
+                    const nx = x + Math.sign(dx) * Math.floor(Math.random() * 3);
+                    const ny = y + Math.sign(dy) * Math.floor(Math.random() * 3);
+                    const nidx = getIndex(nx, ny);
+                    if (nidx !== -1 && grid[nidx].type === TYPE_EMPTY) {
+                        grid[nidx] = grid[idx];
+                        grid[idx] = createCell(TYPE_EMPTY);
+                    }
+                }
+            }
+
+            // Controls UI Binding
+            brushSizeInput.addEventListener('input', (e) => {
+                brushSize = parseInt(e.target.value);
+                brushSizeVal.textContent = brushSize;
+            });
+
+            elementButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    elementButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    const rawType = btn.getAttribute('data-type');
+                    selectedType = rawType === 'wind' ? TYPE_WIND : parseInt(rawType);
+                });
+            });
+
+            btnGravity.addEventListener('click', () => {
+                gravityMode = (gravityMode + 1) % 3;
+                if (gravityMode === 0) {
+                    gravIcon.className = "fa-solid fa-arrow-down text-cyber-cyan";
+                    gravLabel.textContent = "Normal";
+                } else if (gravityMode === 1) {
+                    gravIcon.className = "fa-solid fa-arrow-up text-cyber-magenta";
+                    gravLabel.textContent = "Ters";
+                } else {
+                    gravIcon.className = "fa-solid fa-ban text-cyber-gold";
+                    gravLabel.textContent = "Sıfır G";
+                }
+            });
+
+            btnClear.addEventListener('click', () => {
+                grid.fill(createCell(TYPE_EMPTY));
+                activeParticlesCount = 0;
+            });
+
+            // Physics Update Engine
+            function updatePhysics() {
+                // Determine Gravity Direction Offset
+                let gDir = 1;
+                if (gravityMode === 1) gDir = -1;
+                if (gravityMode === 2) gDir = 0;
+
+                // Copy state to nextGrid
+                for (let i = 0; i < grid.length; i++) {
+                    nextGrid[i] = grid[i];
+                    nextGrid[i].modified = false;
+                }
+
+                activeParticlesCount = 0;
+
+                // Process grid depending on gravity direction to avoid bias
+                const yStart = gDir === -1 ? 0 : rows - 1;
+                const yEnd = gDir === -1 ? rows : -1;
+                const yStep = gDir === -1 ? 1 : -1;
+
+                for (let y = yStart; y !== yEnd; y += yStep) {
+                    // Randomize horizontal sweep direction
+                    const xOrder = Math.random() < 0.5;
+                    for (let x = 0; x < cols; x++) {
+                        const actualX = xOrder ? x : (cols - 1 - x);
+                        const idx = getIndex(actualX, y);
+                        const cell = grid[idx];
+
+                        if (cell.type === TYPE_EMPTY) continue;
+                        if (cell.type !== TYPE_STONE) activeParticlesCount++;
+
+                        if (cell.modified) continue;
+
+                        // ---------------- ELEMENT LOGIC ----------------
+
+                        // 1. SAND PHYSICS
+                        if (cell.type === TYPE_SAND) {
+                            if (gDir === 0) continue; // Zero gravity
+
+                            const below = getIndex(actualX, y + gDir);
+                            const belowLeft = getIndex(actualX - 1, y + gDir);
+                            const belowRight = getIndex(actualX + 1, y + gDir);
+
+                            // Fall straight down
+                            if (below !== -1 && (grid[below].type === TYPE_EMPTY || grid[below].type === TYPE_WATER || grid[below].type === TYPE_OIL)) {
+                                swapCells(idx, below);
+                            } 
+                            // Fall diagonally
+                            else {
+                                const leftFree = belowLeft !== -1 && (grid[belowLeft].type === TYPE_EMPTY || grid[belowLeft].type === TYPE_WATER || grid[belowLeft].type === TYPE_OIL);
+                                const rightFree = belowRight !== -1 && (grid[belowRight].type === TYPE_EMPTY || grid[belowRight].type === TYPE_WATER || grid[belowRight].type === TYPE_OIL);
+
+                                if (leftFree && rightFree) {
+                                    const dir = Math.random() < 0.5 ? belowLeft : belowRight;
+                                    swapCells(idx, dir);
+                                } else if (leftFree) {
+                                    swapCells(idx, belowLeft);
+                                } else if (rightFree) {
+                                    swapCells(idx, belowRight);
+                                }
+                            }
+                        }
+
+                        // 2. WATER & OIL PHYSICS (Liquids)
+                        else if (cell.type === TYPE_WATER || cell.type === TYPE_OIL) {
+                            if (gDir === 0) continue;
+
+                            const below = getIndex(actualX, y + gDir);
+                            const belowLeft = getIndex(actualX - 1, y + gDir);
+                            const belowRight = getIndex(actualX + 1, y + gDir);
+                            const left = getIndex(actualX - 1, y);
+                            const right = getIndex(actualX + 1, y);
+
+                            // Move Down
+                            if (below !== -1 && grid[below].type === TYPE_EMPTY) {
+                                swapCells(idx, below);
+                            } 
+                            // Move Diagonally
+                            else if (belowLeft !== -1 && grid[belowLeft].type === TYPE_EMPTY) {
+                                swapCells(idx, belowLeft);
+                            } else if (belowRight !== -1 && grid[belowRight].type === TYPE_EMPTY) {
+                                swapCells(idx, belowRight);
+                            } 
+                            // Flow Horizontally
+                            else {
+                                const canLeft = left !== -1 && grid[left].type === TYPE_EMPTY;
+                                const canRight = right !== -1 && grid[right].type === TYPE_EMPTY;
+
+                                if (canLeft && canRight) {
+                                    const dir = Math.random() < 0.5 ? left : right;
+                                    swapCells(idx, dir);
+                                } else if (canLeft) {
+                                    swapCells(idx, left);
+                                } else if (canRight) {
+                                    swapCells(idx, right);
+                                }
+                            }
+                        }
+
+                        // 3. FIRE PHYSICS
+                        else if (cell.type === TYPE_FIRE) {
+                            // Age fire
+                            cell.life--;
+                            if (cell.life <= 0) {
+                                nextGrid[idx] = createCell(TYPE_EMPTY);
+                                continue;
+                            }
+
+                            // Rise Upwards
+                            const upDir = gDir === 0 ? -1 : -gDir;
+                            const up = getIndex(actualX, y + upDir);
+                            const upLeft = getIndex(actualX + (Math.random() < 0.5 ? -1 : 1), y + upDir);
+
+                            if (up !== -1 && grid[up].type === TYPE_EMPTY && Math.random() < 0.6) {
+                                swapCells(idx, up);
+                            } else if (upLeft !== -1 && grid[upLeft].type === TYPE_EMPTY && Math.random() < 0.4) {
+                                swapCells(idx, upLeft);
+                            }
+
+                            // Burn Neighbors (Wood, Oil) & Extinguish by Water
+                            const neighbors = [
+                                getIndex(actualX + 1, y), getIndex(actualX - 1, y),
+                                getIndex(actualX, y + 1), getIndex(actualX, y - 1)
+                            ];
+
+                            for (let nidx of neighbors) {
+                                if (nidx === -1) continue;
+                                const nCell = grid[nidx];
+
+                                if (nCell.type === TYPE_WOOD) {
+                                    if (Math.random() < 0.15) nextGrid[nidx] = createCell(TYPE_FIRE);
+                                } else if (nCell.type === TYPE_OIL) {
+                                    // Oil ignites rapidly
+                                    if (Math.random() < 0.5) nextGrid[nidx] = createCell(TYPE_FIRE);
+                                } else if (nCell.type === TYPE_WATER) {
+                                    // Extinguish fire
+                                    nextGrid[idx] = createCell(TYPE_EMPTY);
+                                    break;
+                                }
+                            }
+                        }
+
+                        // 4. ACID PHYSICS
+                        else if (cell.type === TYPE_ACID) {
+                            if (gDir !== 0) {
+                                const below = getIndex(actualX, y + gDir);
+                                if (below !== -1 && grid[below].type === TYPE_EMPTY) {
+                                    swapCells(idx, below);
+                                    continue;
+                                }
+                            }
+
+                            // Dissolve adjacent wood or stone
+                            const neighbors = [
+                                getIndex(actualX + 1, y), getIndex(actualX - 1, y),
+                                getIndex(actualX, y + 1), getIndex(actualX, y - 1)
+                            ];
+
+                            for (let nidx of neighbors) {
+                                if (nidx === -1) continue;
+                                const target = grid[nidx];
+                                if (target.type === TYPE_WOOD || target.type === TYPE_STONE) {
+                                    if (Math.random() < 0.1) {
+                                        nextGrid[nidx] = createCell(TYPE_EMPTY);
+                                        nextGrid[idx] = createCell(TYPE_EMPTY); // Acid consumes itself
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Swap buffer grid
+                grid = [...nextGrid];
+            }
+
+            function swapCells(i1, i2) {
+                const temp = nextGrid[i1];
+                nextGrid[i1] = nextGrid[i2];
+                nextGrid[i2] = temp;
+                nextGrid[i1].modified = true;
+                nextGrid[i2].modified = true;
+            }
+
+            // Rendering Loop
+            function render() {
+                // Clear Background
+                ctx.fillStyle = '#0a0a10';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Draw Grid
+                const imgData = ctx.createImageData(canvas.width, canvas.height);
+                const data = imgData.data;
+
+                for (let y = 0; y < rows; y++) {
+                    for (let x = 0; x < cols; x++) {
+                        const cell = grid[x + y * cols];
+                        if (cell.type === TYPE_EMPTY) continue;
+
+                        const px = x * CELL_SIZE;
+                        const py = y * CELL_SIZE;
+                        const [r, g, b] = cell.color;
+
+                        // Fill CELL_SIZE x CELL_SIZE pixels in ImageData buffer
+                        for (let cy = 0; cy < CELL_SIZE; cy++) {
+                            for (let cx = 0; cx < CELL_SIZE; cx++) {
+                                const screenX = px + cx;
+                                const screenY = py + cy;
+
+                                if (screenX < canvas.width && screenY < canvas.height) {
+                                    const pIdx = (screenX + screenY * canvas.width) * 4;
+                                    data[pIdx] = r;
+                                    data[pIdx + 1] = g;
+                                    data[pIdx + 2] = b;
+                                    data[pIdx + 3] = 255;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                ctx.putImageData(imgData, 0, 0);
+
+                // Draw Brush Outline Indicator
+                if (mouseX >= 0 && mouseX < cols && mouseY >= 0 && mouseY < rows) {
+                    ctx.beginPath();
+                    ctx.arc(
+                        mouseX * CELL_SIZE + CELL_SIZE / 2,
+                        mouseY * CELL_SIZE + CELL_SIZE / 2,
+                        brushSize * CELL_SIZE,
+                        0,
+                        Math.PI * 2
+                    );
+                    ctx.strokeStyle = selectedType === TYPE_WIND ? '#6366f1' : 'rgba(0, 243, 255, 0.5)';
+                    ctx.lineWidth = 1.5;
+                    ctx.stroke();
+                }
+            }
+
+            // Main Animation Frame Loop
+            function animateLoop(now) {
+                // Calculate FPS
+                frameCount++;
+                if (now - lastTime >= 1000) {
+                    fps = frameCount;
+                    frameCount = 0;
+                    lastTime = now;
+                    fpsCounter.textContent = fps;
+                    particleCounter.textContent = activeParticlesCount;
+                }
+
+                updatePhysics();
+                render();
+
+                requestAnimationFrame(animateLoop);
+            }
+
+            // Start Simulation
+            initGrid();
+            requestAnimationFrame(animateLoop);
+        };
     </script>
 </body>
 </html>
