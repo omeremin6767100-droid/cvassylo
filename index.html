@@ -18,7 +18,7 @@
         }
         header {
             text-align: center;
-            padding: 40px 0;
+            padding: 30px 0;
         }
         header h1 {
             font-size: 2.5rem;
@@ -69,10 +69,38 @@
             border-radius: 6px;
             text-decoration: none;
             font-weight: bold;
+            cursor: pointer;
+            border: none;
             transition: background 0.2s;
         }
         .play-btn:hover {
             background: #00cca3;
+        }
+        /* Oyun Alanı Modalı (Penceresi) */
+        #game-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+        .modal-content {
+            background: #1a1d29;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            border: 2px solid #00ffcc;
+            max-width: 400px;
+            width: 90%;
+        }
+        .close-btn {
+            background: #ff4757;
+            margin-top: 20px;
+        }
+        .close-btn:hover {
+            background: #ff6b81;
         }
     </style>
 </head>
@@ -88,29 +116,144 @@
         <div class="game-card">
             <div class="game-info">
                 <h3>Hızlı Tıklayıcı</h3>
-                <p>Süre bitmeden kaç kez tıklayabilirsin? Reflekslerini test et!</p>
-                <a href="#" class="play-btn" onclick="alert('Yakında eklenecek!'); return false;">Oyna</a>
+                <p>Butonaab alabildiğin kadar hızlı tıkla, skoru kap!</p>
+                <button class="play-btn" onclick="startClickerGame()">Oyna</button>
             </div>
         </div>
 
         <!-- Oyun 2 -->
         <div class="game-card">
             <div class="game-info">
-                <h3>Renk Yakalama</h3>
-                <p>Doğru rengi seçerek puanları topla, skoru patlat.</p>
-                <a href="#" class="play-btn" onclick="alert('Yakında eklenecek!'); return false;">Oyna</a>
+                <h3>Renk Bulmaca</h3>
+                <p>Ekranda beliren hedef rengi en hızlı şekilde seç.</p>
+                <button class="play-btn" onclick="startColorGame()">Oyna</button>
             </div>
         </div>
 
         <!-- Oyun 3 -->
         <div class="game-card">
             <div class="game-info">
-                <h3>Piksel Labirent</h3>
-                <p>Engellere çarpmadan çıkışa ulaşabilecek misin?</p>
-                <a href="#" class="play-btn" onclick="alert('Yakında eklenecek!'); return false;">Oyna</a>
+                <h3>Şans Kutusu</h3>
+                <p>Doğru kutuyu seçip sürpriz ödülü bulabilecek misin?</p>
+                <button class="play-btn" onclick="startBoxGame()">Oyna</button>
             </div>
         </div>
     </div>
 
+    <!-- Oyun Ekranı Penceresi -->
+    <div id="game-modal">
+        <div class="modal-content" id="modal-body">
+            <!-- Oyunlar buraya yüklenecek -->
+        </div>
+    </div>
+
+    <script>
+        const modal = document.getElementById('game-modal');
+        const modalBody = document.getElementById('modal-body');
+
+        function closeModal() {
+            modal.style.display = 'none';
+        }
+
+        // 1. Oyun: Hızlı Tıklayıcı
+        function startClickerGame() {
+            modal.style.display = 'flex';
+            let score = 0;
+            let timeLeft = 5;
+            
+            modalBody.innerHTML = `
+                <h3>Hızlı Tıklayıcı</h3>
+                <p style="margin: 15px 0;">Süre: <span id="time" style="color:#00ffcc; font-weight:bold;">5</span>s</p>
+                <p style="font-size: 2rem; margin: 15px 0;" id="click-score">0</p>
+                <button class="play-btn" id="click-target" style="padding: 15px 30px; font-size:1.2rem;">TIKLA!</button>
+                <br>
+                <button class="play-btn close-btn" onclick="closeModal()">Kapat</button>
+            `;
+
+            const targetBtn = document.getElementById('click-target');
+            const scoreDisplay = document.getElementById('click-score');
+            const timeDisplay = document.getElementById('time');
+            
+            let playing = true;
+            targetBtn.onclick = () => {
+                if(!playing) return;
+                score++;
+                scoreDisplay.innerText = score;
+            };
+
+            let timer = setInterval(() => {
+                timeLeft--;
+                timeDisplay.innerText = timeLeft;
+                if(timeLeft <= 0) {
+                    clearInterval(timer);
+                    playing = false;
+                    targetBtn.innerText = "Süre Bitti!";
+                    targetBtn.style.background = "#555";
+                }
+            }, 1000);
+        }
+
+        // 2. Oyun: Renk Bulmaca
+        function startColorGame() {
+            modal.style.display = 'flex';
+            modalBody.innerHTML = `
+                <h3>Renk Bulmaca</h3>
+                <p style="margin: 15px 0;">Doğru rengi bul!</p>
+                <div id="color-box" style="width:100px; height:100px; background:red; margin: 0 auto 15px auto; border-radius:8px;"></div>
+                <div id="color-btns" style="display:flex; gap:10px; justify-content:center;"></div>
+                <br><br>
+                <button class="play-btn close-btn" onclick="closeModal()">Kapat</button>
+            `;
+            
+            // Basit renk mantığı
+            const colors = ['#ff4757', '#2ed573', '#1e90ff', '#ffa502'];
+            const targetColor = colors[Math.floor(Math.random() * colors.length)];
+            document.getElementById('color-box').style.background = targetColor;
+            
+            const btnContainer = document.getElementById('color-btns');
+            colors.sort(() => Math.random() - 0.5).forEach(c => {
+                let b = document.createElement('button');
+                b.className = 'play-btn';
+                b.style.background = c;
+                b.style.width = '50px';
+                b.style.height = '50px';
+                b.onclick = () => {
+                    if(c === targetColor) {
+                        alert('Helal olsun, bildin!');
+                        startColorGame();
+                    } else {
+                        alert('Yanlış renk, tekrar dene!');
+                    }
+                };
+                btnContainer.appendChild(b);
+            });
+        }
+
+        // 3. Oyun: Şans Kutusu
+        function startBoxGame() {
+            modal.style.display = 'flex';
+            let winningBox = Math.floor(Math.random() * 3) + 1;
+            
+            modalBody.innerHTML = `
+                <h3>Şans Kutusu</h3>
+                <p style="margin: 15px 0;">3 kutudan birinde ödül var, seç!</p>
+                <div style="display:flex; gap:10px; justify-content:center; margin:20px 0;">
+                    <button class="play-btn" onclick="checkB(1, ${winningBox})">Kutu 1</button>
+                    <button class="play-btn" onclick="checkB(2, ${winningBox})">Kutu 2</button>
+                    <button class="play-btn" onclick="checkB(3, ${winningBox})">Kutu 3</button>
+                </div>
+                <button class="play-btn close-btn" onclick="closeModal()">Kapat</button>
+            `;
+        }
+
+        function checkB(chosen, winning) {
+            if(chosen === winning) {
+                alert('Tebrikler! Altını buldun!');
+            } else {
+                alert('Boş çıktı! Tekrar dene.');
+            }
+            startBoxGame();
+        }
+    </script>
 </body>
 </html>
