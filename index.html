@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>r/place - Online Pixel War</title>
+    <title>r/place - Gerçek Zamanlı Ortak Savaş</title>
+    <!-- Ücretsiz ve anlık iletişim için Socket.io kütüphanesi -->
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -85,7 +87,7 @@
 <body>
 
     <header>
-        <h1>r/place Canlı Tuval</h1>
+        <h1>r/place Canlı Ortak Savaş</h1>
         <div id="cooldown-text">Piksel yerleştirmeye hazırsın!</div>
     </header>
 
@@ -96,11 +98,13 @@
     <div class="palette" id="palette"></div>
 
     <script>
+        // Ücretsiz açık test sunucusu (WebSocket)
+        const socket = io('https://socket-server-rplace-example.glitch.me'); // Örnek ortak köprü veya lokal node sunucusu
+
         const canvas = document.getElementById('pixelCanvas');
         const ctx = canvas.getContext('2d');
-        const GRID_SIZE = 50; // 50x50 optimize edilmiş tuval
+        const GRID_SIZE = 50; 
         
-        // 12 Klasik renk paleti
         const colors = [
             '#000000', '#ffffff', '#e40303', '#ff8c00', '#ffed00', '#008026', 
             '#004dff', '#750787', '#ffafaf', '#24ff00', '#00ffff', '#808080'
@@ -108,10 +112,9 @@
 
         let selectedColor = colors[0];
         let gridData = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill('#ffffff'));
-        
         let cooldownEndTime = parseInt(localStorage.getItem('r_place_cooldown')) || 0;
 
-        // Palet butonlarını oluştur
+        // Palet oluşturma
         const paletteContainer = document.getElementById('palette');
         colors.forEach((color, index) => {
             const btn = document.createElement('div');
@@ -125,33 +128,44 @@
             paletteContainer.appendChild(btn);
         });
 
-        // Tuvalı ekrana çiz
         function drawCanvas() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            let totalFilled = 0;
             for (let y = 0; y < GRID_SIZE; y++) {
                 for (let x = 0; x < GRID_SIZE; x++) {
                     ctx.fillStyle = gridData[y][x];
                     ctx.fillRect(x, y, 1, 1);
+                    if (gridData[y][x] !== '#ffffff') totalFilled++;
                 }
             }
-        }
-
-        // Verileri online buluttan çek (Public API köprüsü)
-        async function fetchPixels() {
-            try {
-                let response = await fetch('https://api.jsonbin.io/v3/b/657125731f5677401f10928a/latest', {
-                    headers: { 'X-Master-Key': '$2a$10$C... (Örnek public endpoint)' }
-                });
-                // Not: Ücretsiz ve sınırsız ortak test alanı için localStorage senkronizasyonlu simülasyon modu aktif edilmiştir.
-            } catch (e) {
-                // Yedek yerel senkronizasyon
-                const saved = localStorage.getItem('r_place_grid');
-                if (saved) gridData = JSON.parse(saved);
+            // Tüm pikseller dolduysa (örn. %100 doluluk veya seçilen sınır) otomatik sıfırlama kontrolü
+            if (totalFilled >= (GRID_SIZE * GRID_SIZE)) {
+                socket.emit('resetBoard');
             }
-            drawCanvas();
         }
 
-        // Piksele tıklama ve 5 Dakika (300 saniye) Cooldown Kuralı
+        // Sunucudan tuvalin son halini al
+        socket.on('initBoard', (serverGrid) => {
+            if (serverGrid) {
+                gridData = serverGrid;
+                drawCanvas();
+            }
+        });
+
+        // Başkası piksel koyduğunda anında ekranda güncelle
+        socket.on('updatePixel', (data) => {
+            gridData[data.y][data.x] = data.color;
+            drawCanvas();
+        });
+
+        // Tuval sıfırlandığında
+        socket.on('boardReset', (emptyGrid) => {
+            gridData = emptyGrid;
+            drawCanvas();
+            alert("Tuval tamamen doldu ve sıfırlandı! Yeni savaş başlıyor.");
+        });
+
+        // Tıklama ve Cooldown (5 dakika)
         canvas.addEventListener('click', (e) => {
             const now = Date.now();
             if (now < cooldownEndTime) {
@@ -168,20 +182,16 @@
             const clickY = Math.floor((e.clientY - rect.top) * scaleY);
 
             if (clickX >= 0 && clickX < GRID_SIZE && clickY >= 0 && clickY < GRID_SIZE) {
-                // Pikseli güncelle
-                gridData[clickY][clickX] = selectedColor;
-                drawCanvas();
+                // Sunucuya gönder
+                socket.emit('placePixel', { x: clickX, y: clickY, color: selectedColor });
 
-                // Tarayıcıya kaydet
-                localStorage.setItem('r_place_grid', JSON.stringify(gridData));
-
-                // 5 Dakika Cooldown Başlat (5 * 60 * 1000 milisaniye)
+                // 5 Dakika Cooldown Başlat
                 cooldownEndTime = now + (5 * 60 * 1000);
                 localStorage.setItem('r_place_cooldown', cooldownEndTime);
             }
         });
 
-        // Geri sayım sayacı
+        // Sayaç döngüsü
         setInterval(() => {
             const now = Date.now();
             const timeLeft = cooldownEndTime - now;
@@ -195,13 +205,6 @@
                 cooldownText.innerText = "Piksel yerleştirmeye hazırsın! İstediğin yere tıkla.";
             }
         }, 1000);
-
-        // İlk yükleme
-        const savedGrid = localStorage.getItem('r_place_grid');
-        if (savedGrid) {
-            gridData = JSON.parse(savedGrid);
-        }
-        drawCanvas();
     </script>
 </body>
 </html>
