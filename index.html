@@ -25,13 +25,39 @@
             --border: #e0e0e0;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; transition: background 0.3s, color 0.3s; }
-        body { background-color: var(--bg-color); color: var(--text); padding: 20px; min-height: 100vh; }
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            font-family: 'Segoe UI', Tahoma, sans-serif; 
+            transition: background 0.3s, color 0.3s; 
+        }
+        
+        body { 
+            background-color: var(--bg-color); 
+            color: var(--text); 
+            padding: 20px; 
+            min-height: 100vh; 
+        }
 
-        /* Top Bar & Header */
-        header { text-align: center; padding: 20px 0 30px; position: relative; }
-        header h1 { font-size: 3.2rem; color: var(--accent); text-shadow: 0 0 15px rgba(0,255,204,0.4); letter-spacing: 2px; }
-        header p { color: var(--subtext); margin-top: 5px; font-size: 1.1rem; }
+        header { 
+            text-align: center; 
+            padding: 20px 0 30px; 
+            position: relative; 
+        }
+        
+        header h1 { 
+            font-size: 3.2rem; 
+            color: var(--accent); 
+            text-shadow: 0 0 15px rgba(0,255,204,0.4); 
+            letter-spacing: 2px; 
+        }
+        
+        header p { 
+            color: var(--subtext); 
+            margin-top: 5px; 
+            font-size: 1.1rem; 
+        }
         
         .controls-bar {
             max-width: 1200px;
@@ -47,46 +73,161 @@
             border: 1px solid var(--border);
         }
 
-        .search-box { flex: 1; min-width: 200px; }
+        .search-box { 
+            flex: 1; 
+            min-width: 200px; 
+        }
+        
         .search-box input {
-            width: 100%; padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border);
-            background: var(--bg-color); color: var(--text); font-size: 1rem;
+            width: 100%; 
+            padding: 10px 15px; 
+            border-radius: 8px; 
+            border: 1px solid var(--border);
+            background: var(--bg-color); 
+            color: var(--text); 
+            font-size: 1rem;
         }
 
         .filter-btn, .action-btn {
-            background: var(--bg-color); color: var(--text); border: 1px solid var(--border);
-            padding: 9px 16px; border-radius: 8px; cursor: pointer; font-weight: bold;
+            background: var(--bg-color); 
+            color: var(--text); 
+            border: 1px solid var(--border);
+            padding: 9px 16px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: bold;
         }
-        .filter-btn.active, .action-btn:hover { background: var(--accent); color: #000; border-color: var(--accent); }
+        
+        .filter-btn.active, .action-btn:hover { 
+            background: var(--accent); 
+            color: #000; 
+            border-color: var(--accent); 
+        }
 
-        /* Grid */
         .container {
-            max-width: 1200px; margin: 0 auto;
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-            gap: 20px; padding: 10px 0;
+            max-width: 1200px; 
+            margin: 0 auto;
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 20px; 
+            padding: 10px 0;
         }
 
         .game-card {
-            background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border);
-            padding: 20px; display: flex; flex-direction: column; justify-content: space-between;
-            position: relative; overflow: hidden; height: 220px;
+            background: var(--card-bg); 
+            border-radius: 12px; 
+            border: 1px solid var(--border);
+            padding: 20px; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: space-between;
+            position: relative; 
+            overflow: hidden; 
+            height: 220px;
         }
-        .game-card:hover { transform: translateY(-5px); border-color: var(--accent); box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
-        .game-card h3 { font-size: 1.2rem; margin-bottom: 6px; }
-        .game-card p { color: var(--subtext); font-size: 0.85rem; line-height: 1.3; }
-        .badge { position: absolute; top: 12px; right: 12px; font-size: 0.7rem; padding: 3px 8px; border-radius: 20px; background: var(--accent); color: #000; font-weight: bold; }
-
-        .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; }
-        .play-btn { background: var(--accent); color: #000; padding: 8px 16px; border-radius: 6px; font-weight: bold; border: none; cursor: pointer; }
-        .play-btn:hover { background: var(--accent-hover); }
-        .like-btn { background: transparent; border: none; cursor: pointer; font-size: 1.2rem; color: var(--subtext); }
-
-        /* Modal */
-        #game-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; z-index: 999; }
-        .modal-content { background: var(--card-bg); padding: 30px; border-radius: 16px; border: 2px solid var(--accent); max-width: 500px; width: 90%; text-align: center; position: relative; }
-        .close-modal { position: absolute; top: 15px; right: 15px; background: #ff4757; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; }
         
-        .stats-panel { max-width: 1200px; margin: 20px auto; text-align: center; color: var(--subtext); font-size: 0.9rem; }
+        .game-card:hover { 
+            transform: translateY(-5px); 
+            border-color: var(--accent); 
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4); 
+        }
+        
+        .game-card h3 { 
+            font-size: 1.2rem; 
+            margin-bottom: 6px; 
+        }
+        
+        .game-card p { 
+            color: var(--subtext); 
+            font-size: 0.85rem; 
+            line-height: 1.3; 
+        }
+        
+        .badge { 
+            position: absolute; 
+            top: 12px; 
+            right: 12px; 
+            font-size: 0.7rem; 
+            padding: 3px 8px; 
+            border-radius: 20px; 
+            background: var(--accent); 
+            color: #000; 
+            font-weight: bold; 
+        }
+
+        .card-footer { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-top: 15px; 
+        }
+        
+        .play-btn { 
+            background: var(--accent); 
+            color: #000; 
+            padding: 8px 16px; 
+            border-radius: 6px; 
+            font-weight: bold; 
+            border: none; 
+            cursor: pointer; 
+        }
+        
+        .play-btn:hover { 
+            background: var(--accent-hover); 
+        }
+        
+        .like-btn { 
+            background: transparent; 
+            border: none; 
+            cursor: pointer; 
+            font-size: 1.2rem; 
+            color: var(--subtext); 
+        }
+
+        #game-modal { 
+            display: none; 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(0,0,0,0.9); 
+            justify-content: center; 
+            align-items: center; 
+            z-index: 999; 
+        }
+        
+        .modal-content { 
+            background: var(--card-bg); 
+            padding: 30px; 
+            border-radius: 16px; 
+            border: 2px solid var(--accent); 
+            max-width: 500px; 
+            width: 90%; 
+            text-align: center; 
+            position: relative; 
+        }
+        
+        .close-modal { 
+            position: absolute; 
+            top: 15px; 
+            right: 15px; 
+            background: #ff4757; 
+            color: #fff; 
+            border: none; 
+            padding: 6px 12px; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-weight: bold; 
+        }
+        
+        .stats-panel { 
+            max-width: 1200px; 
+            margin: 20px auto; 
+            text-align: center; 
+            color: var(--subtext); 
+            font-size: 0.9rem; 
+        }
     </style>
 </head>
 <body>
@@ -126,7 +267,6 @@
     </div>
 
     <script>
-        // 30 Oyun Verisi
         const games = [
             { id: 1, title: "Hızlı Tıklayıcı", cat: "action", tag: "POPÜLER", desc: "5 saniyede kaç defa basabilirsin?" },
             { id: 2, title: "Renk Bulmaca", cat: "brain", tag: "ZOR", desc: "Hedef rengi en hızlı şekilde seç." },
@@ -194,9 +334,17 @@
             else renderGames(games.filter(g => g.cat === cat));
         }
 
-        function toggleTheme() { document.body.classList.toggle('light-theme'); }
-        function playRandom() { playGame(Math.floor(Math.random() * games.length) + 1); }
-        function closeGame() { document.getElementById('game-modal').style.display = 'none'; }
+        function toggleTheme() { 
+            document.body.classList.toggle('light-theme'); 
+        }
+        
+        function playRandom() { 
+            playGame(Math.floor(Math.random() * games.length) + 1); 
+        }
+        
+        function closeGame() { 
+            document.getElementById('game-modal').style.display = 'none'; 
+        }
 
         function playGame(id) {
             totalP++;
@@ -205,7 +353,6 @@
             const body = document.getElementById('modalBody');
             modal.style.display = 'flex';
 
-            // Örnek oyun motorları altyapısı
             if(id === 1) {
                 let score = 0, time = 5;
                 body.innerHTML = `<h3>Hızlı Tıklayıcı</h3><p style="margin:15px;">Süre: <b id="t">5</b> | Skor: <b id="s">0</b></p><button class="play-btn" id="btn" style="padding:15px 30px;">TIKLA!</button>`;
@@ -245,7 +392,6 @@
             document.getElementById('totalScore').innerText = "Kazanılan Puan: " + totalS;
         }
 
-        // Başlangıç çalıştırması
         renderGames(games);
     </script>
 </body>
