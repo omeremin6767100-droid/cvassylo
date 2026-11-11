@@ -3,9 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>r/place - Gerçek Zamanlı Ortak Savaş</title>
-    <!-- Ücretsiz ve anlık iletişim için Socket.io kütüphanesi -->
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <title>r/place - Pixel War</title>
     <style>
         * {
             box-sizing: border-box;
@@ -34,7 +32,8 @@
         }
         #cooldown-text {
             font-size: 1rem;
-            color: #aaa;
+            color: #00ffcc;
+            font-weight: bold;
         }
         #canvas-container {
             position: relative;
@@ -87,7 +86,7 @@
 <body>
 
     <header>
-        <h1>r/place Canlı Ortak Savaş</h1>
+        <h1>r/place Canlı Tuval</h1>
         <div id="cooldown-text">Piksel yerleştirmeye hazırsın!</div>
     </header>
 
@@ -98,9 +97,6 @@
     <div class="palette" id="palette"></div>
 
     <script>
-        // Ücretsiz açık test sunucusu (WebSocket)
-        const socket = io('https://socket-server-rplace-example.glitch.me'); // Örnek ortak köprü veya lokal node sunucusu
-
         const canvas = document.getElementById('pixelCanvas');
         const ctx = canvas.getContext('2d');
         const GRID_SIZE = 50; 
@@ -112,9 +108,18 @@
 
         let selectedColor = colors[0];
         let gridData = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill('#ffffff'));
-        let cooldownEndTime = parseInt(localStorage.getItem('r_place_cooldown')) || 0;
 
-        // Palet oluşturma
+        // LocalStorage'dan kayıtlı verileri al
+        const savedGrid = localStorage.getItem('r_place_grid');
+        if (savedGrid) {
+            try {
+                gridData = JSON.parse(savedGrid);
+            } catch (e) {
+                console.error("Grid verisi okunamadı:", e);
+            }
+        }
+
+        // Palet Oluşturma
         const paletteContainer = document.getElementById('palette');
         colors.forEach((color, index) => {
             const btn = document.createElement('div');
@@ -128,49 +133,42 @@
             paletteContainer.appendChild(btn);
         });
 
+        // Tuval Çizimi ve Doluluk/Sıfırlama Kontrolü
         function drawCanvas() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            let totalFilled = 0;
+            let filledCount = 0;
+
             for (let y = 0; y < GRID_SIZE; y++) {
                 for (let x = 0; x < GRID_SIZE; x++) {
                     ctx.fillStyle = gridData[y][x];
                     ctx.fillRect(x, y, 1, 1);
-                    if (gridData[y][x] !== '#ffffff') totalFilled++;
+                    if (gridData[y][x] !== '#ffffff') {
+                        filledCount++;
+                    }
                 }
             }
-            // Tüm pikseller dolduysa (örn. %100 doluluk veya seçilen sınır) otomatik sıfırlama kontrolü
-            if (totalFilled >= (GRID_SIZE * GRID_SIZE)) {
-                socket.emit('resetBoard');
+
+            // Eğer tuvaldeki bütün pikseller doldurulduysa otomatik sıfırla
+            if (filledCount >= (GRID_SIZE * GRID_SIZE)) {
+                setTimeout(() => {
+                    alert("Tuval tamamen doldu! Sıfırlanıyor...");
+                    gridData = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill('#ffffff'));
+                    localStorage.setItem('r_place_grid', JSON.stringify(gridData));
+                    drawCanvas();
+                }, 100);
             }
         }
 
-        // Sunucudan tuvalin son halini al
-        socket.on('initBoard', (serverGrid) => {
-            if (serverGrid) {
-                gridData = serverGrid;
-                drawCanvas();
-            }
-        });
-
-        // Başkası piksel koyduğunda anında ekranda güncelle
-        socket.on('updatePixel', (data) => {
-            gridData[data.y][data.x] = data.color;
-            drawCanvas();
-        });
-
-        // Tuval sıfırlandığında
-        socket.on('boardReset', (emptyGrid) => {
-            gridData = emptyGrid;
-            drawCanvas();
-            alert("Tuval tamamen doldu ve sıfırlandı! Yeni savaş başlıyor.");
-        });
-
-        // Tıklama ve Cooldown (5 dakika)
+        // Piksel Koyma Mantığı
         canvas.addEventListener('click', (e) => {
             const now = Date.now();
-            if (now < cooldownEndTime) {
-                const kalanSaniye = Math.ceil((cooldownEndTime - now) / 1000);
-                alert(`Bekleme süresindesin! Kalan süre: ${Math.floor(kalanSaniye / 60)} dakika ${kalanSaniye % 60} saniye.`);
+            const storedCooldown = parseInt(localStorage.getItem('r_place_cooldown')) || 0;
+
+            if (now < storedCooldown) {
+                const remainingSeconds = Math.ceil((storedCooldown - now) / 1000);
+                const mins = Math.floor(remainingSeconds / 60);
+                const secs = remainingSeconds % 60;
+                alert(`Henüz bekleme süresindesin! Kalan süre: ${mins}dk ${secs}sn`);
                 return;
             }
 
@@ -182,29 +180,44 @@
             const clickY = Math.floor((e.clientY - rect.top) * scaleY);
 
             if (clickX >= 0 && clickX < GRID_SIZE && clickY >= 0 && clickY < GRID_SIZE) {
-                // Sunucuya gönder
-                socket.emit('placePixel', { x: clickX, y: clickY, color: selectedColor });
+                // Pikseli Güncelle
+                gridData[clickY][clickX] = selectedColor;
+                localStorage.setItem('r_place_grid', JSON.stringify(gridData));
+                drawCanvas();
 
-                // 5 Dakika Cooldown Başlat
-                cooldownEndTime = now + (5 * 60 * 1000);
-                localStorage.setItem('r_place_cooldown', cooldownEndTime);
+                // 5 Dakika (300.000 ms) Cooldown Ayarla
+                const newCooldown = now + (5 * 60 * 1000);
+                localStorage.setItem('r_place_cooldown', newCooldown);
             }
         });
 
-        // Sayaç döngüsü
+        // Sayaç Güncellemesi
         setInterval(() => {
             const now = Date.now();
-            const timeLeft = cooldownEndTime - now;
+            const storedCooldown = parseInt(localStorage.getItem('r_place_cooldown')) || 0;
+            const timeLeft = storedCooldown - now;
             const cooldownText = document.getElementById('cooldown-text');
 
             if (timeLeft > 0) {
                 const minutes = Math.floor(timeLeft / (1000 * 60));
                 const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+                cooldownText.style.color = '#ff4500';
                 cooldownText.innerText = `Yeni piksel için bekleme süresi: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
             } else {
+                cooldownText.style.color = '#00ffcc';
                 cooldownText.innerText = "Piksel yerleştirmeye hazırsın! İstediğin yere tıkla.";
             }
         }, 1000);
+
+        // Sekmeler arası canlı senkronizasyon (Aynı bilgisayarda/sekmede anında görünmesi için)
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'r_place_grid' && e.newValue) {
+                gridData = JSON.parse(e.newValue);
+                drawCanvas();
+            }
+        });
+
+        drawCanvas();
     </script>
 </body>
 </html>
