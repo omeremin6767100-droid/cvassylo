@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>r/place - Global Pixel War</title>
+    <title>r/place - Live Peer Pixel War</title>
+    <!-- Ücretsiz ve Doğrudan Bağlantı Sağlayan PeerJS Kütüphanesi -->
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -36,9 +38,9 @@
             font-weight: bold;
         }
         #status-text {
-            font-size: 0.8rem;
-            color: #888;
-            margin-top: 4px;
+            font-size: 0.85rem;
+            color: #ffaa00;
+            margin-top: 5px;
         }
         #canvas-container {
             position: relative;
@@ -93,7 +95,7 @@
     <header>
         <h1>r/place Canlı Ortak Tuval</h1>
         <div id="cooldown-text">Piksel yerleştirmeye hazırsın!</div>
-        <div id="status-text">Ortak sunucuya bağlanıyor...</div>
+        <div id="status-text">Oda kuruluyor...</div>
     </header>
 
     <div id="canvas-container">
@@ -107,9 +109,6 @@
         const ctx = canvas.getContext('2d');
         const GRID_SIZE = 50; 
         
-        // Ücretsiz ve açık veritabanı adresi (Ortak Tuval Havuzu)
-        const API_URL = 'https://jsonblob.com/api/jsonBlob/1234567890123456789'; // Otomatik fallback ve online köprü
-
         const colors = [
             '#000000', '#ffffff', '#e40303', '#ff8c00', '#ffed00', '#008026', 
             '#004dff', '#750787', '#ffafaf', '#24ff00', '#00ffff', '#808080'
@@ -117,7 +116,53 @@
 
         let selectedColor = colors[0];
         let gridData = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill('#ffffff'));
-        let isSyncing = false;
+        
+        // P2P Canlı Bağlantı Kurulumu
+        const ROOM_ID = "cvassylo-rplace-room-1"; // Ortak Oda Adı
+        const peer = new Peer();
+        let connections = [];
+
+        peer.on('open', (id) => {
+            document.getElementById('status-text').innerText = "● Canlı Ağ Aktif (Diğer oyuncular bekleniyor)";
+            document.getElementById('status-text').style.color = "#00ffcc";
+            
+            // Odaya bağlanmayı dene
+            const conn = peer.connect(ROOM_ID);
+            setupConnection(conn);
+        });
+
+        peer.on('connection', (conn) => {
+            setupConnection(conn);
+        });
+
+        function setupConnection(conn) {
+            conn.on('open', () => {
+                connections.push(conn);
+                document.getElementById('status-text').innerText = "● Oyuncu Bağlandı! Canlı Senkronize";
+                document.getElementById('status-text').style.color = "#00ff00";
+
+                // Mevcut tuval durumunu yeni gelen oyuncuya gönder
+                conn.send({ type: 'INIT', grid: gridData });
+            });
+
+            conn.on('data', (data) => {
+                if (data.type === 'PIXEL') {
+                    gridData[data.y][data.x] = data.color;
+                    drawCanvas();
+                } else if (data.type === 'INIT') {
+                    gridData = data.grid;
+                    drawCanvas();
+                }
+            });
+        }
+
+        function broadcastPixel(x, y, color) {
+            connections.forEach(conn => {
+                if (conn.open) {
+                    conn.send({ type: 'PIXEL', x: x, y: y, color: color });
+                }
+            });
+        }
 
         // Palet Oluşturma
         const paletteContainer = document.getElementById('palette');
@@ -133,7 +178,7 @@
             paletteContainer.appendChild(btn);
         });
 
-        // Tuval Çizimi
+        // Tuval Çizimi ve Sıfırlama
         function drawCanvas() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             let filledCount = 0;
@@ -148,56 +193,17 @@
                 }
             }
 
-            // Tüm pikseller dolunca tuval otomatik sıfırlanır
             if (filledCount >= (GRID_SIZE * GRID_SIZE)) {
                 setTimeout(() => {
                     alert("Tuval tamamen doldu! Sıfırlanıyor...");
                     gridData = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill('#ffffff'));
-                    saveOnlineData();
                     drawCanvas();
                 }, 100);
             }
         }
 
-        // Online Verileri Ortak Havuzdan Çek (Herkesin bilgisayarında günceller)
-        async function loadOnlineData() {
-            try {
-                const res = await fetch('https://api.keyvalue.xyz/rplace_cvassylo_canvas/data');
-                if (res.ok) {
-                    const text = await res.text();
-                    if (text) {
-                        gridData = JSON.parse(text);
-                        drawCanvas();
-                        document.getElementById('status-text').innerText = "● Canlı Sunucu Bağlantısı Aktif";
-                        document.getElementById('status-text').style.color = "#00ffcc";
-                    }
-                }
-            } catch (e) {
-                // Sunucu geçici yanıt vermezse tarayıcı önbelleğini kullan
-                const local = localStorage.getItem('r_place_grid');
-                if (local) {
-                    gridData = JSON.parse(local);
-                    drawCanvas();
-                }
-                document.getElementById('status-text').innerText = "● Canlı Senkronizasyon Çalışıyor";
-            }
-        }
-
-        // Pikseli Ortak Havuza Kaydet
-        async function saveOnlineData() {
-            localStorage.setItem('r_place_grid', JSON.stringify(gridData));
-            try {
-                await fetch('https://api.keyvalue.xyz/rplace_cvassylo_canvas/data', {
-                    method: 'POST',
-                    body: JSON.stringify(gridData)
-                });
-            } catch (e) {
-                console.log("Online senkronizasyon tamamlandı.");
-            }
-        }
-
         // Piksel Koyma ve 5 Dakika Cooldown
-        canvas.addEventListener('click', async (e) => {
+        canvas.addEventListener('click', (e) => {
             const now = Date.now();
             const storedCooldown = parseInt(localStorage.getItem('r_place_cooldown')) || 0;
 
@@ -217,20 +223,19 @@
             const clickY = Math.floor((e.clientY - rect.top) * scaleY);
 
             if (clickX >= 0 && clickX < GRID_SIZE && clickY >= 0 && clickY < GRID_SIZE) {
-                // Tuvalı güncelle
                 gridData[clickY][clickX] = selectedColor;
                 drawCanvas();
 
-                // Ortak sunucuya gönder
-                await saveOnlineData();
+                // Canlı olarak bağlanan diğer kişilere gönder
+                broadcastPixel(clickX, clickY, selectedColor);
 
-                // 5 Dakikalık (300.000 ms) Cooldown Başlat
+                // 5 Dakika (300.000 ms) Cooldown
                 const newCooldown = now + (5 * 60 * 1000);
                 localStorage.setItem('r_place_cooldown', newCooldown);
             }
         });
 
-        // Geri Sayım Sayacı
+        // Sayaç Güncellemesi
         setInterval(() => {
             const now = Date.now();
             const storedCooldown = parseInt(localStorage.getItem('r_place_cooldown')) || 0;
@@ -248,11 +253,7 @@
             }
         }, 1000);
 
-        // Her 3 saniyede bir başkası piksel koydu mu diye otomatik kontrol et (Canlı Yenileme)
-        setInterval(loadOnlineData, 3000);
-
-        // İlk yükleme
-        loadOnlineData();
+        drawCanvas();
     </script>
 </body>
 </html>
