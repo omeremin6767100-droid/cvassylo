@@ -21,19 +21,19 @@
             padding: 30px 0;
         }
         header h1 {
-            font-size: 2.5rem;
+            font-size: 2.8rem;
             color: #00ffcc;
-            text-shadow: 0 0 10px rgba(0,255,204,0.5);
+            text-shadow: 0 0 12px rgba(0,255,204,0.6);
         }
         header p {
             color: #8b9bb4;
-            margin-top: 10px;
+            margin-top: 8px;
         }
         .container {
-            max-width: 1000px;
+            max-width: 1100px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
             gap: 20px;
             padding: 20px 0;
         }
@@ -43,10 +43,13 @@
             overflow: hidden;
             border: 1px solid #2a2e43;
             transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
         .game-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,255,204,0.2);
+            box-shadow: 0 10px 20px rgba(0,255,204,0.25);
             border-color: #00ffcc;
         }
         .game-info {
@@ -55,52 +58,82 @@
         .game-info h3 {
             font-size: 1.2rem;
             margin-bottom: 8px;
+            color: #ffffff;
         }
         .game-info p {
             color: #8b9bb4;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             margin-bottom: 15px;
+            line-height: 1.4;
         }
         .play-btn {
             display: inline-block;
             background: #00ffcc;
             color: #0f111a;
-            padding: 10px 20px;
+            padding: 10px 18px;
             border-radius: 6px;
             text-decoration: none;
             font-weight: bold;
             cursor: pointer;
             border: none;
             transition: background 0.2s;
+            width: 100%;
         }
         .play-btn:hover {
             background: #00cca3;
         }
-        /* Oyun Alanı Modalı (Penceresi) */
+        /* Oyun Ekranı (Modal) */
         #game-modal {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85);
+            background: rgba(0,0,0,0.88);
             justify-content: center;
             align-items: center;
             z-index: 100;
         }
         .modal-content {
             background: #1a1d29;
-            padding: 30px;
-            border-radius: 12px;
+            padding: 25px;
+            border-radius: 14px;
             text-align: center;
             border: 2px solid #00ffcc;
-            max-width: 400px;
+            max-width: 420px;
             width: 90%;
+            box-shadow: 0 0 25px rgba(0,255,204,0.3);
         }
         .close-btn {
             background: #ff4757;
-            margin-top: 20px;
+            color: #fff;
+            margin-top: 15px;
         }
         .close-btn:hover {
             background: #ff6b81;
+        }
+        .status-msg {
+            margin: 12px 0;
+            font-weight: bold;
+            font-size: 1.1rem;
+            min-height: 25px;
+        }
+        .game-box-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .mini-btn {
+            background: #2a2e43;
+            color: #fff;
+            border: 1px solid #00ffcc;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .mini-btn:hover {
+            background: #00ffcc;
+            color: #0f111a;
         }
     </style>
 </head>
@@ -108,151 +141,262 @@
 
     <header>
         <h1>Cvassylo</h1>
-        <p>En eğlenceli mini tarayıcı oyunları burada!</p>
+        <p>10 Tane Harika Mini Oyun Tek Sayfada!</p>
     </header>
 
     <div class="container">
-        <!-- Oyun 1 -->
-        <div class="game-card">
-            <div class="game-info">
-                <h3>Hızlı Tıklayıcı</h3>
-                <p>Butonaab alabildiğin kadar hızlı tıkla, skoru kap!</p>
-                <button class="play-btn" onclick="startClickerGame()">Oyna</button>
-            </div>
-        </div>
-
-        <!-- Oyun 2 -->
-        <div class="game-card">
-            <div class="game-info">
-                <h3>Renk Bulmaca</h3>
-                <p>Ekranda beliren hedef rengi en hızlı şekilde seç.</p>
-                <button class="play-btn" onclick="startColorGame()">Oyna</button>
-            </div>
-        </div>
-
-        <!-- Oyun 3 -->
-        <div class="game-card">
-            <div class="game-info">
-                <h3>Şans Kutusu</h3>
-                <p>Doğru kutuyu seçip sürpriz ödülü bulabilecek misin?</p>
-                <button class="play-btn" onclick="startBoxGame()">Oyna</button>
-            </div>
-        </div>
+        <!-- 10 Oyun Kartı -->
+        <div class="game-card"><div class="game-info"><h3>1. Hızlı Tıklayıcı</h3><p>5 saniyede kaç defa basabilirsin?</p><button class="play-btn" onclick="g1()">Oyna</button></div></div>
+        <div class="game-card"><div class="game-info"><h3>2. Renk Bulmaca</h3><p>Doğru renge en hızlı şekilde dokun.</p><button class="play-btn" onclick="g2()">Oyna</button></div></div>
+        <div class="game-card"><div class="game-info"><h3>3. Şans Kutusu</h3><p>3 kutudan hangisinde altın var?</p><button class="play-btn" onclick="g3()">Oyna</button></div></div>
+        <div class="game-card"><div class="game-info"><h3>4. Sayı Tahmin</h3><p>1-10 arası tutulan sayıyı bul!</p><button class="play-btn" onclick="g4()">Oyna</button></div></div>
+        <div class="game-card"><div class="game-info"><h3>5. Taş Kağıt Makas</h3><p>Yapay zekayı mağlup edebilecek misin?</p><button class="play-btn" onclick="g5()">Oyna</button></div></div>
+        <div class="game-card"><div class="game-info"><h3>6. Şans Zarı</h3><p>Yüksek zar atan rakipten puanı kapar.</p><button class="play-btn" onclick="g6()">Oyna</button></div></div>
+        <div class="game-card"><div class="game-info"><h3>7. Matematik Canavarı</h3><p>Hızlı toplama işlemlerini doğru yap.</p><button class="play-btn" onclick="g7()">Oyna</button></div></div>
+        <div class="game-card"><div class="game-info"><h3>8. Yazı Tura</h3><p>Parayı at, tahminini yap!</p><button class="play-btn" onclick="g8()">Oyna</button></div></div>
+        <div class="game-card"><div class="game-info"><h3>9. Hafıza Kartı</h3><p>Gizli eşleşen renkleri aç.</p><button class="play-btn" onclick="g9()">Oyna</button></div></div>
+        <div class="game-card"><div class="game-info"><h3>10. Tepki Ölçer</h3><p>Ekran yeşil olduğu an tıkla!</p><button class="play-btn" onclick="g10()">Oyna</button></div></div>
     </div>
 
-    <!-- Oyun Ekranı Penceresi -->
+    <!-- Oyun Ekranı -->
     <div id="game-modal">
-        <div class="modal-content" id="modal-body">
-            <!-- Oyunlar buraya yüklenecek -->
-        </div>
+        <div class="modal-content" id="modal-body"></div>
     </div>
 
     <script>
         const modal = document.getElementById('game-modal');
         const modalBody = document.getElementById('modal-body');
 
-        function closeModal() {
-            modal.style.display = 'none';
-        }
+        function closeModal() { modal.style.display = 'none'; }
 
-        // 1. Oyun: Hızlı Tıklayıcı
-        function startClickerGame() {
+        // 1. Hızlı Tıklayıcı
+        function g1() {
             modal.style.display = 'flex';
-            let score = 0;
-            let timeLeft = 5;
-            
+            let score = 0, time = 5, playing = true;
             modalBody.innerHTML = `
                 <h3>Hızlı Tıklayıcı</h3>
-                <p style="margin: 15px 0;">Süre: <span id="time" style="color:#00ffcc; font-weight:bold;">5</span>s</p>
-                <p style="font-size: 2rem; margin: 15px 0;" id="click-score">0</p>
-                <button class="play-btn" id="click-target" style="padding: 15px 30px; font-size:1.2rem;">TIKLA!</button>
-                <br>
+                <div class="status-msg">Süre: <span id="t">5</span>s | Skor: <span id="s">0</span></div>
+                <button class="play-btn" id="b" style="padding: 20px; font-size:1.3rem;">TIKLA!</button>
                 <button class="play-btn close-btn" onclick="closeModal()">Kapat</button>
             `;
-
-            const targetBtn = document.getElementById('click-target');
-            const scoreDisplay = document.getElementById('click-score');
-            const timeDisplay = document.getElementById('time');
-            
-            let playing = true;
-            targetBtn.onclick = () => {
-                if(!playing) return;
-                score++;
-                scoreDisplay.innerText = score;
-            };
-
+            const b = document.getElementById('b'), s = document.getElementById('s'), t = document.getElementById('t');
+            b.onclick = () => { if(playing){ score++; s.innerText = score; } };
             let timer = setInterval(() => {
-                timeLeft--;
-                timeDisplay.innerText = timeLeft;
-                if(timeLeft <= 0) {
-                    clearInterval(timer);
-                    playing = false;
-                    targetBtn.innerText = "Süre Bitti!";
-                    targetBtn.style.background = "#555";
-                }
+                time--; t.innerText = time;
+                if(time <= 0) { clearInterval(timer); playing = false; b.innerText = "Süre Bitti!"; b.style.background = "#444"; }
             }, 1000);
         }
 
-        // 2. Oyun: Renk Bulmaca
-        function startColorGame() {
+        // 2. Renk Bulmaca
+        function g2() {
             modal.style.display = 'flex';
+            const colors = ['#ff4757', '#2ed573', '#1e90ff', '#ffa502'];
+            const target = colors[Math.floor(Math.random() * colors.length)];
             modalBody.innerHTML = `
                 <h3>Renk Bulmaca</h3>
-                <p style="margin: 15px 0;">Doğru rengi bul!</p>
-                <div id="color-box" style="width:100px; height:100px; background:red; margin: 0 auto 15px auto; border-radius:8px;"></div>
-                <div id="color-btns" style="display:flex; gap:10px; justify-content:center;"></div>
-                <br><br>
-                <button class="play-btn close-btn" onclick="closeModal()">Kapat</button>
-            `;
-            
-            // Basit renk mantığı
-            const colors = ['#ff4757', '#2ed573', '#1e90ff', '#ffa502'];
-            const targetColor = colors[Math.floor(Math.random() * colors.length)];
-            document.getElementById('color-box').style.background = targetColor;
-            
-            const btnContainer = document.getElementById('color-btns');
-            colors.sort(() => Math.random() - 0.5).forEach(c => {
-                let b = document.createElement('button');
-                b.className = 'play-btn';
-                b.style.background = c;
-                b.style.width = '50px';
-                b.style.height = '50px';
-                b.onclick = () => {
-                    if(c === targetColor) {
-                        alert('Helal olsun, bildin!');
-                        startColorGame();
-                    } else {
-                        alert('Yanlış renk, tekrar dene!');
-                    }
-                };
-                btnContainer.appendChild(b);
-            });
-        }
-
-        // 3. Oyun: Şans Kutusu
-        function startBoxGame() {
-            modal.style.display = 'flex';
-            let winningBox = Math.floor(Math.random() * 3) + 1;
-            
-            modalBody.innerHTML = `
-                <h3>Şans Kutusu</h3>
-                <p style="margin: 15px 0;">3 kutudan birinde ödül var, seç!</p>
-                <div style="display:flex; gap:10px; justify-content:center; margin:20px 0;">
-                    <button class="play-btn" onclick="checkB(1, ${winningBox})">Kutu 1</button>
-                    <button class="play-btn" onclick="checkB(2, ${winningBox})">Kutu 2</button>
-                    <button class="play-btn" onclick="checkB(3, ${winningBox})">Kutu 3</button>
+                <p style="margin:10px 0;">Hedef Rengi Seç:</p>
+                <div style="width:70px; height:70px; background:${target}; margin:0 auto 15px; border-radius:10px;"></div>
+                <div id="msg" class="status-msg">Seçim yap bekleniyor...</div>
+                <div style="display:flex; gap:10px; justify-content:center;">
+                    ${colors.sort(() => Math.random() - 0.5).map(c => `<button class="mini-btn" style="background:${c}; width:45px; height:45px;" onclick="checkG2('${c}', '${target}')"></button>`).join('')}
                 </div>
                 <button class="play-btn close-btn" onclick="closeModal()">Kapat</button>
             `;
         }
+        function checkG2(chosen, target) {
+            const m = document.getElementById('msg');
+            if(chosen === target) { m.innerText = "TEBRİKLER! Doğru Renk!"; m.style.color="#00ffcc"; }
+            else { m.innerText = "YANLIŞ! Tekrar Dene."; m.style.color="#ff4757"; }
+        }
 
-        function checkB(chosen, winning) {
-            if(chosen === winning) {
-                alert('Tebrikler! Altını buldun!');
+        // 3. Şans Kutusu
+        function g3() {
+            modal.style.display = 'flex';
+            let win = Math.floor(Math.random() * 3) + 1;
+            modalBody.innerHTML = `
+                <h3>Şans Kutusu</h3>
+                <div id="msg" class="status-msg">Ödüllü kutuyu seç!</div>
+                <div style="display:flex; gap:10px; justify-content:center; margin:15px 0;">
+                    <button class="mini-btn" onclick="checkG3(1, ${win})">Kutu 1</button>
+                    <button class="mini-btn" onclick="checkG3(2, ${win})">Kutu 2</button>
+                    <button class="mini-btn" onclick="checkG3(3, ${win})">Kutu 3</button>
+                </div>
+                <button class="play-btn close-btn" onclick="closeModal()">Kapat</button>
+            `;
+        }
+        function checkG3(c, w) {
+            const m = document.getElementById('msg');
+            if(c === w) { m.innerText = "ALTINI BULDUN!"; m.style.color="#00ffcc"; }
+            else { m.innerText = "BOŞ ÇIKTI! Yeniden Dene."; m.style.color="#ff4757"; }
+        }
+
+        // 4. Sayı Tahmin
+        function g4() {
+            modal.style.display = 'flex';
+            let secret = Math.floor(Math.random() * 10) + 1;
+            modalBody.innerHTML = `
+                <h3>Sayı Tahmin (1-10)</h3>
+                <div id="msg" class="status-msg">Aklımdan bir sayı tuttum...</div>
+                <div class="game-box-grid">
+                    ${[1,2,3,4,5,6,7,8,9,10].map(n => `<button class="mini-btn" onclick="checkG4(${n}, ${secret})">${n}</button>`).join('')}
+                </div>
+                <button class="play-btn close-btn" onclick="closeModal()">Kapat</button>
+            `;
+        }
+        function checkG4(n, s) {
+            const m = document.getElementById('msg');
+            if(n === s) { m.innerText = "BİLDİN! Sayı: " + s; m.style.color="#00ffcc"; }
+            else if(n < s) { m.innerText = "Daha BÜYÜK bir sayı!"; m.style.color="#ffa502"; }
+            else { m.innerText = "Daha KÜÇÜK bir sayı!"; m.style.color="#ffa502"; }
+        }
+
+        // 5. Taş Kağıt Makas
+        function g5() {
+            modal.style.display = 'flex';
+            modalBody.innerHTML = `
+                <h3>Taş Kağıt Makas</h3>
+                <div id="msg" class="status-msg">Hamleni Yap!</div>
+                <div style="display:flex; gap:10px; justify-content:center; margin:15px 0;">
+                    <button class="mini-btn" onclick="checkG5('Taş')">✊ Taş</button>
+                    <button class="mini-btn" onclick="checkG5('Kağıt')">✋ Kağıt</button>
+                    <button class="mini-btn" onclick="checkG5('Makas')">✌️ Makas</button>
+                </div>
+                <button class="play-btn close-btn" onclick="closeModal()">Kapat</button>
+            `;
+        }
+        function checkG5(p) {
+            const opts = ['Taş', 'Kağıt', 'Makas'];
+            const bot = opts[Math.floor(Math.random()*3)];
+            const m = document.getElementById('msg');
+            if(p === bot) m.innerText = `Berabere! İki taraf da ${p} yaptı.`;
+            else if((p==='Taş'&&bot==='Makas')||(p==='Kağıt'&&bot==='Taş')||(p==='Makas'&&bot==='Kağıt')) {
+                m.innerText = `KAZANDIN! (${p} v ${bot})`; m.style.color="#00ffcc";
             } else {
-                alert('Boş çıktı! Tekrar dene.');
+                m.innerText = `KAYBETTİN! (${p} v ${bot})`; m.style.color="#ff4757";
             }
-            startBoxGame();
+        }
+
+        // 6. Şans Zarı
+        function g6() {
+            modal.style.display = 'flex';
+            modalBody.innerHTML = `
+                <h3>Şans Zarı</h3>
+                <div id="msg" class="status-msg">Zar atmak için butona bas!</div>
+                <button class="play-btn" onclick="rollG6()">Zarları At 🎲</button>
+                <button class="play-btn close-btn" onclick="closeModal()">Kapat</button>
+            `;
+        }
+        function rollG6() {
+            const p = Math.floor(Math.random()*6)+1, b = Math.floor(Math.random()*6)+1;
+            const m = document.getElementById('msg');
+            if(p > b) { m.innerText = `Sen: ${p} | Bot: ${b} -> KAZANDIN!`; m.style.color="#00ffcc"; }
+            else if(b > p) { m.innerText = `Sen: ${p} | Bot: ${b} -> Kaybettin!`; m.style.color="#ff4757"; }
+            else { m.innerText = `Sen: ${p} | Bot: ${b} -> Berabere!`; m.style.color="#ffa502"; }
+        }
+
+        // 7. Matematik Canavarı
+        function g7() {
+            modal.style.display = 'flex';
+            let a = Math.floor(Math.random()*20)+1, b = Math.floor(Math.random()*20)+1;
+            let ans = a + b;
+            modalBody.innerHTML = `
+                <h3>Matematik Canavarı</h3>
+                <div class="status-msg">${a} + ${b} = ?</div>
+                <input type="number" id="ans" style="padding:10px; width:80%; font-size:1.2rem; border-radius:6px; text-align:center; margin-bottom:10px;">
+                <div id="msg" class="status-msg"></div>
+                <button class="play-btn" onclick="checkG7(${ans})">Cevapla</button>
+                <button class="play-btn close-btn" onclick="closeModal()">Kapat</button>
+            `;
+        }
+        function checkG7(ans) {
+            const val = parseInt(document.getElementById('ans').value);
+            const m = document.getElementById('msg');
+            if(val === ans) { m.innerText = "DOĞRU CEVAP!"; m.style.color="#00ffcc"; setTimeout(g7, 1000); }
+            else { m.innerText = "YANLIŞ! Tekrar Dene."; m.style.color="#ff4757"; }
+        }
+
+        // 8. Yazı Tura
+        function g8() {
+            modal.style.display = 'flex';
+            modalBody.innerHTML = `
+                <h3>Yazı Tura</h3>
+                <div id="msg" class="status-msg">Tahminini Yap!</div>
+                <div style="display:flex; gap:10px; justify-content:center; margin:15px 0;">
+                    <button class="mini-btn" onclick="flipG8('Yazı')">Yazı</button>
+                    <button class="mini-btn" onclick="flipG8('Tura')">Tura</button>
+                </div>
+                <button class="play-btn close-btn" onclick="closeModal()">Kapat</button>
+            `;
+        }
+        function flipG8(p) {
+            const res = Math.random() > 0.5 ? 'Yazı' : 'Tura';
+            const m = document.getElementById('msg');
+            if(p === res) { m.innerText = `Para: ${res} -> TEBRİKLER!`; m.style.color="#00ffcc"; }
+            else { m.innerText = `Para: ${res} -> Bilemedin!`; m.style.color="#ff4757"; }
+        }
+
+        // 9. Hafıza Kartı
+        let firstCard = null;
+        function g9() {
+            modal.style.display = 'flex';
+            firstCard = null;
+            const items = ['#ff4757', '#ff4757', '#2ed573', '#2ed573', '#1e90ff', '#1e90ff'].sort(()=>Math.random()-0.5);
+            modalBody.innerHTML = `
+                <h3>Hafıza Kartı</h3>
+                <div id="msg" class="status-msg">Aynı renkleri eşleştir!</div>
+                <div class="game-box-grid">
+                    ${items.map((c, i) => `<button class="mini-btn" id="card-${i}" onclick="flipG9(this, '${c}')">?</button>`).join('')}
+                </div>
+                <button class="play-btn close-btn" onclick="closeModal()">Kapat</button>
+            `;
+        }
+        function flipG9(btn, color) {
+            btn.style.background = color;
+            btn.innerText = "";
+            if(!firstCard) {
+                firstCard = { btn, color };
+            } else {
+                const m = document.getElementById('msg');
+                if(firstCard.color === color) {
+                    m.innerText = "EŞLEŞTİ!"; m.style.color="#00ffcc";
+                    firstCard = null;
+                } else {
+                    m.innerText = "YANLIŞ!"; m.style.color="#ff4757";
+                    setTimeout(() => {
+                        btn.style.background = "#2a2e43"; btn.innerText = "?";
+                        firstCard.btn.style.background = "#2a2e43"; firstCard.btn.innerText = "?";
+                        firstCard = null;
+                    }, 500);
+                }
+            }
+        }
+
+        // 10. Tepki Ölçer
+        function g10() {
+            modal.style.display = 'flex';
+            modalBody.innerHTML = `
+                <h3>Tepki Ölçer</h3>
+                <div id="target-box" style="width:100%; height:120px; background:#ff4757; border-radius:10px; display:flex; align-items:center; justify-content:center; margin:15px 0; font-size:1.3rem; font-weight:bold; cursor:pointer;">KIRMIZI: Bekle...</div>
+                <button class="play-btn close-btn" onclick="closeModal()">Kapat</button>
+            `;
+            const box = document.getElementById('target-box');
+            let startTime, ready = false;
+            let timer = setTimeout(() => {
+                ready = true;
+                box.style.background = "#2ed573";
+                box.innerText = "TŞKLARR! ŞİMDİ TIKLA!";
+                startTime = Date.now();
+            }, Math.random() * 3000 + 2000);
+
+            box.onclick = () => {
+                if(!ready) {
+                    clearTimeout(timer);
+                    box.innerText = "Çok erken tıkladın!";
+                } else {
+                    let diff = Date.now() - startTime;
+                    box.innerText = `Tepki Süren: ${diff} ms!`;
+                }
+            };
         }
     </script>
 </body>
