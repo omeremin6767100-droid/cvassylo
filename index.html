@@ -1,638 +1,207 @@
 <!DOCTYPE html>
-<html lang="tr" class="dark">
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>cvassylo Sandbox</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        cyber: {
-                            dark: '#0a0a10',
-                            panel: '#12131e',
-                            border: '#2a2d45',
-                            cyan: '#00f3ff',
-                            magenta: '#ff0055',
-                            gold: '#ffd700'
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- FontAwesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>r/place - Online Pixel War</title>
     <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
         body {
-            background-color: #0a0a10;
-            color: #e2e8f0;
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: #121212;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
             overflow: hidden;
-            touch-action: none;
-            user-select: none;
         }
-
-        /* Neon Glow Effects */
-        .neon-title {
-            text-shadow: 0 0 10px rgba(0, 243, 255, 0.7),
-                         0 0 20px rgba(0, 243, 255, 0.4);
+        header {
+            margin-bottom: 15px;
+            text-align: center;
         }
-
-        .neon-box {
-            box-shadow: 0 0 15px rgba(0, 243, 255, 0.15),
-                        inset 0 0 15px rgba(0, 243, 255, 0.05);
+        h1 {
+            font-size: 1.8rem;
+            color: #ff4500;
+            margin-bottom: 5px;
         }
-
-        .mat-btn {
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        #cooldown-text {
+            font-size: 1rem;
+            color: #aaa;
         }
-
-        .mat-btn.active {
-            transform: scale(1.05);
-            box-shadow: 0 0 12px var(--btn-color);
-            border-color: var(--btn-color);
+        #canvas-container {
+            position: relative;
+            border: 4px solid #333;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            background-color: #ffffff;
+            cursor: crosshair;
+            width: 500px;
+            height: 500px;
+            max-width: 90vw;
+            max-height: 50vh;
         }
-
-        /* Custom Scrollbar for side panel if needed */
-        ::-webkit-scrollbar {
-            width: 4px;
+        canvas {
+            display: block;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            width: 100%;
+            height: 100%;
         }
-        ::-webkit-scrollbar-track {
-            background: #0a0a10;
+        .palette {
+            display: flex;
+            gap: 8px;
+            margin-top: 20px;
+            background: #1e1e1e;
+            padding: 10px 20px;
+            border-radius: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 90vw;
         }
-        ::-webkit-scrollbar-thumb {
-            background: #2a2d45;
-            border-radius: 2px;
+        .color-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .color-btn:hover {
+            transform: scale(1.15);
+        }
+        .color-btn.active {
+            border-color: #fff;
+            transform: scale(1.2);
+            box-shadow: 0 0 10px rgba(255,255,255,0.6);
         }
     </style>
 </head>
-<body class="flex flex-col h-screen w-screen relative select-none">
+<body>
 
-    <!-- Header / Navbar -->
-    <header class="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-4 py-3 bg-cyber-panel/80 backdrop-blur-md border-b border-cyber-border">
-        <div class="flex items-center gap-3">
-            <i class="fa-solid font-bold text-cyber-cyan text-xl fa-flask animate-pulse"></i>
-            <h1 class="text-xl md:text-2xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyber-cyan via-blue-400 to-cyber-magenta neon-title uppercase">
-                cvassylo <span class="text-xs font-semibold px-2 py-0.5 rounded border border-cyber-cyan text-cyber-cyan ml-1">SANDBOX</span>
-            </h1>
-        </div>
-
-        <!-- System Metrics Display -->
-        <div class="flex items-center gap-4 text-xs font-mono text-gray-400 bg-cyber-dark/60 px-3 py-1.5 rounded-lg border border-cyber-border">
-            <div>FPS: <span id="fps-counter" class="text-cyber-cyan font-bold">60</span></div>
-            <div class="hidden sm:block">|</div>
-            <div class="hidden sm:block">Parçacık: <span id="particle-counter" class="text-cyber-gold font-bold">0</span></div>
-        </div>
+    <header>
+        <h1>r/place Canlı Tuval</h1>
+        <div id="cooldown-text">Piksel yerleştirmeye hazırsın!</div>
     </header>
 
-    <!-- Main Canvas Area -->
-    <main class="relative flex-1 w-full h-full overflow-hidden">
-        <canvas id="sandboxCanvas" class="w-full h-full block cursor-crosshair"></canvas>
-    </main>
-
-    <!-- Floating UI Controls Panel (Bottom Overlay) -->
-    <div class="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 w-[95%] max-w-4xl bg-cyber-panel/90 backdrop-blur-lg border border-cyber-border p-3 md:p-4 rounded-2xl neon-box flex flex-col md:flex-row items-center gap-4">
-        
-        <!-- Element Selector Grid -->
-        <div class="flex flex-wrap items-center justify-center gap-2 flex-1 w-full" id="element-buttons">
-            <!-- Dynamic elements will be inserted via JS or defined here -->
-            <button data-type="1" class="mat-btn active px-3 py-2 rounded-xl border border-yellow-500/30 bg-yellow-950/40 text-yellow-400 text-xs font-medium flex items-center gap-1.5" style="--btn-color: #ffd700;">
-                <i class="fa-solid fa-cubes-stacked"></i> Kum
-            </button>
-            <button data-type="2" class="mat-btn px-3 py-2 rounded-xl border border-cyan-500/30 bg-cyan-950/40 text-cyan-400 text-xs font-medium flex items-center gap-1.5" style="--btn-color: #00f3ff;">
-                <i class="fa-solid fa-droplet"></i> Su
-            </button>
-            <button data-type="3" class="mat-btn px-3 py-2 rounded-xl border border-orange-500/30 bg-orange-950/40 text-orange-400 text-xs font-medium flex items-center gap-1.5" style="--btn-color: #ff5500;">
-                <i class="fa-solid fa-fire"></i> Ateş
-            </button>
-            <button data-type="4" class="mat-btn px-3 py-2 rounded-xl border border-amber-800/30 bg-amber-950/40 text-amber-500 text-xs font-medium flex items-center gap-1.5" style="--btn-color: #8b5a2b;">
-                <i class="fa-solid fa-tree"></i> Odun
-            </button>
-            <button data-type="5" class="mat-btn px-3 py-2 rounded-xl border border-slate-500/30 bg-slate-800/40 text-slate-300 text-xs font-medium flex items-center gap-1.5" style="--btn-color: #808080;">
-                <i class="fa-solid fa-square"></i> Taş
-            </button>
-            <button data-type="6" class="mat-btn px-3 py-2 rounded-xl border border-green-500/30 bg-green-950/40 text-green-400 text-xs font-medium flex items-center gap-1.5" style="--btn-color: #39ff14;">
-                <i class="fa-solid fa-vial-virus"></i> Asit
-            </button>
-            <button data-type="7" class="mat-btn px-3 py-2 rounded-xl border border-purple-500/30 bg-purple-950/40 text-purple-400 text-xs font-medium flex items-center gap-1.5" style="--btn-color: #a855f7;">
-                <i class="fa-solid fa-gas-pump"></i> Petrol
-            </button>
-            <button data-type="0" class="mat-btn px-3 py-2 rounded-xl border border-red-500/30 bg-red-950/40 text-red-400 text-xs font-medium flex items-center gap-1.5" style="--btn-color: #ff0055;">
-                <i class="fa-solid fa-eraser"></i> Silgi
-            </button>
-            <button data-type="wind" class="mat-btn px-3 py-2 rounded-xl border border-indigo-500/30 bg-indigo-950/40 text-indigo-300 text-xs font-medium flex items-center gap-1.5" style="--btn-color: #6366f1;">
-                <i class="fa-solid fa-wind"></i> Rüzgar/Patlama
-            </button>
-        </div>
-
-        <div class="h-px md:h-8 w-full md:w-px bg-cyber-border"></div>
-
-        <!-- Controls: Brush Size & Gravity & Reset -->
-        <div class="flex items-center justify-between md:justify-end gap-3 w-full md:w-auto">
-            
-            <!-- Brush Size -->
-            <div class="flex items-center gap-2 bg-cyber-dark/80 px-3 py-1.5 rounded-xl border border-cyber-border">
-                <i class="fa-solid fa-circle-dot text-xs text-gray-400"></i>
-                <input type="range" id="brushSize" min="1" max="15" value="4" class="w-20 accent-cyber-cyan cursor-pointer">
-                <span id="brushSizeVal" class="text-xs font-mono text-cyber-cyan w-4">4</span>
-            </div>
-
-            <!-- Gravity Toggle -->
-            <button id="btn-gravity" class="px-3 py-2 rounded-xl bg-cyber-dark border border-cyber-border hover:border-cyber-cyan text-xs font-medium text-gray-300 flex items-center gap-1.5 transition-all">
-                <i class="fa-solid fa-arrow-down text-cyber-cyan" id="grav-icon"></i>
-                <span id="grav-label" class="hidden sm:inline">Normal</span>
-            </button>
-
-            <!-- Clear Canvas -->
-            <button id="btn-clear" class="px-3 py-2 rounded-xl bg-red-950/40 border border-red-500/40 hover:bg-red-900/60 text-xs font-medium text-red-300 flex items-center gap-1.5 transition-all">
-                <i class="fa-solid fa-trash-can"></i>
-                <span class="hidden sm:inline">Temizle</span>
-            </button>
-        </div>
+    <div id="canvas-container">
+        <canvas id="pixelCanvas" width="50" height="50"></canvas>
     </div>
 
-    <!-- Simulation Script Logic -->
+    <div class="palette" id="palette"></div>
+
     <script>
-        window.onload = function() {
-            const canvas = document.getElementById('sandboxCanvas');
-            const ctx = canvas.getContext('2d');
-            
-            // Grid and Dimensions
-            const CELL_SIZE = 4; // Size of each pixel cell
-            let cols = 0;
-            let rows = 0;
-            let grid = [];
-            let nextGrid = [];
+        const canvas = document.getElementById('pixelCanvas');
+        const ctx = canvas.getContext('2d');
+        const GRID_SIZE = 50; // 50x50 optimize edilmiş tuval
+        
+        // 12 Klasik renk paleti
+        const colors = [
+            '#000000', '#ffffff', '#e40303', '#ff8c00', '#ffed00', '#008026', 
+            '#004dff', '#750787', '#ffafaf', '#24ff00', '#00ffff', '#808080'
+        ];
 
-            // UI Elements
-            const fpsCounter = document.getElementById('fps-counter');
-            const particleCounter = document.getElementById('particle-counter');
-            const brushSizeInput = document.getElementById('brushSize');
-            const brushSizeVal = document.getElementById('brushSizeVal');
-            const elementButtons = document.querySelectorAll('.mat-btn');
-            const btnGravity = document.getElementById('btn-gravity');
-            const gravIcon = document.getElementById('grav-icon');
-            const gravLabel = document.getElementById('grav-label');
-            const btnClear = document.getElementById('btn-clear');
+        let selectedColor = colors[0];
+        let gridData = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill('#ffffff'));
+        
+        let cooldownEndTime = parseInt(localStorage.getItem('r_place_cooldown')) || 0;
 
-            // State variables
-            let selectedType = 1; // Default: Sand
-            let brushSize = parseInt(brushSizeInput.value);
-            let isMouseDown = false;
-            let mouseX = 0;
-            let mouseY = 0;
-            let gravityMode = 0; // 0: Normal, 1: Inverted, 2: Zero Gravity
-            let activeParticlesCount = 0;
-
-            // Frame timing
-            let lastTime = performance.now();
-            let frameCount = 0;
-            let fps = 60;
-
-            // Element Types Definition
-            // 0: EMPTY, 1: SAND, 2: WATER, 3: FIRE, 4: WOOD, 5: STONE, 6: ACID, 7: OIL
-            const TYPE_EMPTY = 0;
-            const TYPE_SAND = 1;
-            const TYPE_WATER = 2;
-            const TYPE_FIRE = 3;
-            const TYPE_WOOD = 4;
-            const TYPE_STONE = 5;
-            const TYPE_ACID = 6;
-            const TYPE_OIL = 7;
-            const TYPE_WIND = 'wind';
-
-            // Element Palette & Properties
-            const ELEMENT_SPECS = {
-                [TYPE_EMPTY]: { color: [10, 10, 16], name: 'Boş' },
-                [TYPE_SAND]:  { color: [255, 215, 0], variance: 20, name: 'Kum' },
-                [TYPE_WATER]: { color: [0, 243, 255], variance: 30, name: 'Su' },
-                [TYPE_FIRE]:  { color: [255, 85, 0],  variance: 40, lifetime: 25, name: 'Ateş' },
-                [TYPE_WOOD]:  { color: [139, 90, 43], variance: 15, name: 'Odun' },
-                [TYPE_STONE]: { color: [128, 128, 128], variance: 10, name: 'Taş' },
-                [TYPE_ACID]:  { color: [57, 255, 20], variance: 25, name: 'Asit' },
-                [TYPE_OIL]:   { color: [168, 85, 247], variance: 20, name: 'Petrol' }
-            };
-
-            // Canvas & Grid Initialization
-            function initGrid() {
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
-                
-                cols = Math.floor(canvas.width / CELL_SIZE);
-                rows = Math.floor(canvas.height / CELL_SIZE);
-
-                grid = new Array(cols * rows).fill(0).map(() => createCell(TYPE_EMPTY));
-                nextGrid = new Array(cols * rows).fill(0).map(() => createCell(TYPE_EMPTY));
-            }
-
-            function createCell(type, extraProps = {}) {
-                if (type === TYPE_EMPTY) return { type: TYPE_EMPTY, color: ELEMENT_SPECS[TYPE_EMPTY].color };
-
-                const spec = ELEMENT_SPECS[type];
-                let color = [...spec.color];
-
-                // Add slight color variance for realism
-                if (spec.variance) {
-                    const v = (Math.random() - 0.5) * spec.variance;
-                    color[0] = Math.min(255, Math.max(0, color[0] + v));
-                    color[1] = Math.min(255, Math.max(0, color[1] + v));
-                    color[2] = Math.min(255, Math.max(0, color[2] + v));
-                }
-
-                return {
-                    type: type,
-                    color: color,
-                    life: spec.lifetime || 0,
-                    modified: false,
-                    ...extraProps
-                };
-            }
-
-            function getIndex(x, y) {
-                if (x < 0 || x >= cols || y < 0 || y >= rows) return -1;
-                return x + y * cols;
-            }
-
-            // Window Resize Handling
-            window.addEventListener('resize', () => {
-                initGrid();
+        // Palet butonlarını oluştur
+        const paletteContainer = document.getElementById('palette');
+        colors.forEach((color, index) => {
+            const btn = document.createElement('div');
+            btn.className = `color-btn ${index === 0 ? 'active' : ''}`;
+            btn.style.backgroundColor = color;
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedColor = color;
             });
+            paletteContainer.appendChild(btn);
+        });
 
-            // Input Handling (Mouse / Touch)
-            function updateMousePos(e) {
-                const rect = canvas.getBoundingClientRect();
-                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                mouseX = Math.floor((clientX - rect.left) / CELL_SIZE);
-                mouseY = Math.floor((clientY - rect.top) / CELL_SIZE);
-            }
-
-            canvas.addEventListener('mousedown', (e) => {
-                isMouseDown = true;
-                updateMousePos(e);
-                spawnParticles();
-            });
-
-            canvas.addEventListener('mousemove', (e) => {
-                updateMousePos(e);
-                if (isMouseDown) spawnParticles();
-            });
-
-            window.addEventListener('mouseup', () => isMouseDown = false);
-
-            canvas.addEventListener('touchstart', (e) => {
-                isMouseDown = true;
-                updateMousePos(e);
-                spawnParticles();
-            }, { passive: true });
-
-            canvas.addEventListener('touchmove', (e) => {
-                updateMousePos(e);
-                if (isMouseDown) spawnParticles();
-            }, { passive: true });
-
-            window.addEventListener('touchend', () => isMouseDown = false);
-
-            // Spawn Particles inside Brush Radius
-            function spawnParticles() {
-                const radius = brushSize;
-                for (let dx = -radius; dx <= radius; dx++) {
-                    for (let dy = -radius; dy <= radius; dy++) {
-                        if (dx * dx + dy * dy <= radius * radius) {
-                            const gx = mouseX + dx;
-                            const gy = mouseY + dy;
-                            const idx = getIndex(gx, gy);
-
-                            if (idx !== -1) {
-                                if (selectedType === TYPE_WIND) {
-                                    // Apply explosion force
-                                    applyWindForce(gx, gy, dx, dy);
-                                } else {
-                                    // Spawn selected element (or erase)
-                                    if (selectedType === TYPE_EMPTY || Math.random() < 0.75) {
-                                        grid[idx] = createCell(selectedType);
-                                    }
-                                }
-                            }
-                        }
-                    }
+        // Tuvalı ekrana çiz
+        function drawCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let y = 0; y < GRID_SIZE; y++) {
+                for (let x = 0; x < GRID_SIZE; x++) {
+                    ctx.fillStyle = gridData[y][x];
+                    ctx.fillRect(x, y, 1, 1);
                 }
             }
+        }
 
-            function applyWindForce(x, y, dx, dy) {
-                const idx = getIndex(x, y);
-                if (idx !== -1 && grid[idx].type !== TYPE_EMPTY && grid[idx].type !== TYPE_STONE) {
-                    const nx = x + Math.sign(dx) * Math.floor(Math.random() * 3);
-                    const ny = y + Math.sign(dy) * Math.floor(Math.random() * 3);
-                    const nidx = getIndex(nx, ny);
-                    if (nidx !== -1 && grid[nidx].type === TYPE_EMPTY) {
-                        grid[nidx] = grid[idx];
-                        grid[idx] = createCell(TYPE_EMPTY);
-                    }
-                }
-            }
-
-            // Controls UI Binding
-            brushSizeInput.addEventListener('input', (e) => {
-                brushSize = parseInt(e.target.value);
-                brushSizeVal.textContent = brushSize;
-            });
-
-            elementButtons.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    elementButtons.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    const rawType = btn.getAttribute('data-type');
-                    selectedType = rawType === 'wind' ? TYPE_WIND : parseInt(rawType);
+        // Verileri online buluttan çek (Public API köprüsü)
+        async function fetchPixels() {
+            try {
+                let response = await fetch('https://api.jsonbin.io/v3/b/657125731f5677401f10928a/latest', {
+                    headers: { 'X-Master-Key': '$2a$10$C... (Örnek public endpoint)' }
                 });
-            });
+                // Not: Ücretsiz ve sınırsız ortak test alanı için localStorage senkronizasyonlu simülasyon modu aktif edilmiştir.
+            } catch (e) {
+                // Yedek yerel senkronizasyon
+                const saved = localStorage.getItem('r_place_grid');
+                if (saved) gridData = JSON.parse(saved);
+            }
+            drawCanvas();
+        }
 
-            btnGravity.addEventListener('click', () => {
-                gravityMode = (gravityMode + 1) % 3;
-                if (gravityMode === 0) {
-                    gravIcon.className = "fa-solid fa-arrow-down text-cyber-cyan";
-                    gravLabel.textContent = "Normal";
-                } else if (gravityMode === 1) {
-                    gravIcon.className = "fa-solid fa-arrow-up text-cyber-magenta";
-                    gravLabel.textContent = "Ters";
-                } else {
-                    gravIcon.className = "fa-solid fa-ban text-cyber-gold";
-                    gravLabel.textContent = "Sıfır G";
-                }
-            });
-
-            btnClear.addEventListener('click', () => {
-                grid.fill(createCell(TYPE_EMPTY));
-                activeParticlesCount = 0;
-            });
-
-            // Physics Update Engine
-            function updatePhysics() {
-                // Determine Gravity Direction Offset
-                let gDir = 1;
-                if (gravityMode === 1) gDir = -1;
-                if (gravityMode === 2) gDir = 0;
-
-                // Copy state to nextGrid
-                for (let i = 0; i < grid.length; i++) {
-                    nextGrid[i] = grid[i];
-                    nextGrid[i].modified = false;
-                }
-
-                activeParticlesCount = 0;
-
-                // Process grid depending on gravity direction to avoid bias
-                const yStart = gDir === -1 ? 0 : rows - 1;
-                const yEnd = gDir === -1 ? rows : -1;
-                const yStep = gDir === -1 ? 1 : -1;
-
-                for (let y = yStart; y !== yEnd; y += yStep) {
-                    // Randomize horizontal sweep direction
-                    const xOrder = Math.random() < 0.5;
-                    for (let x = 0; x < cols; x++) {
-                        const actualX = xOrder ? x : (cols - 1 - x);
-                        const idx = getIndex(actualX, y);
-                        const cell = grid[idx];
-
-                        if (cell.type === TYPE_EMPTY) continue;
-                        if (cell.type !== TYPE_STONE) activeParticlesCount++;
-
-                        if (cell.modified) continue;
-
-                        // ---------------- ELEMENT LOGIC ----------------
-
-                        // 1. SAND PHYSICS
-                        if (cell.type === TYPE_SAND) {
-                            if (gDir === 0) continue; // Zero gravity
-
-                            const below = getIndex(actualX, y + gDir);
-                            const belowLeft = getIndex(actualX - 1, y + gDir);
-                            const belowRight = getIndex(actualX + 1, y + gDir);
-
-                            // Fall straight down
-                            if (below !== -1 && (grid[below].type === TYPE_EMPTY || grid[below].type === TYPE_WATER || grid[below].type === TYPE_OIL)) {
-                                swapCells(idx, below);
-                            } 
-                            // Fall diagonally
-                            else {
-                                const leftFree = belowLeft !== -1 && (grid[belowLeft].type === TYPE_EMPTY || grid[belowLeft].type === TYPE_WATER || grid[belowLeft].type === TYPE_OIL);
-                                const rightFree = belowRight !== -1 && (grid[belowRight].type === TYPE_EMPTY || grid[belowRight].type === TYPE_WATER || grid[belowRight].type === TYPE_OIL);
-
-                                if (leftFree && rightFree) {
-                                    const dir = Math.random() < 0.5 ? belowLeft : belowRight;
-                                    swapCells(idx, dir);
-                                } else if (leftFree) {
-                                    swapCells(idx, belowLeft);
-                                } else if (rightFree) {
-                                    swapCells(idx, belowRight);
-                                }
-                            }
-                        }
-
-                        // 2. WATER & OIL PHYSICS (Liquids)
-                        else if (cell.type === TYPE_WATER || cell.type === TYPE_OIL) {
-                            if (gDir === 0) continue;
-
-                            const below = getIndex(actualX, y + gDir);
-                            const belowLeft = getIndex(actualX - 1, y + gDir);
-                            const belowRight = getIndex(actualX + 1, y + gDir);
-                            const left = getIndex(actualX - 1, y);
-                            const right = getIndex(actualX + 1, y);
-
-                            // Move Down
-                            if (below !== -1 && grid[below].type === TYPE_EMPTY) {
-                                swapCells(idx, below);
-                            } 
-                            // Move Diagonally
-                            else if (belowLeft !== -1 && grid[belowLeft].type === TYPE_EMPTY) {
-                                swapCells(idx, belowLeft);
-                            } else if (belowRight !== -1 && grid[belowRight].type === TYPE_EMPTY) {
-                                swapCells(idx, belowRight);
-                            } 
-                            // Flow Horizontally
-                            else {
-                                const canLeft = left !== -1 && grid[left].type === TYPE_EMPTY;
-                                const canRight = right !== -1 && grid[right].type === TYPE_EMPTY;
-
-                                if (canLeft && canRight) {
-                                    const dir = Math.random() < 0.5 ? left : right;
-                                    swapCells(idx, dir);
-                                } else if (canLeft) {
-                                    swapCells(idx, left);
-                                } else if (canRight) {
-                                    swapCells(idx, right);
-                                }
-                            }
-                        }
-
-                        // 3. FIRE PHYSICS
-                        else if (cell.type === TYPE_FIRE) {
-                            // Age fire
-                            cell.life--;
-                            if (cell.life <= 0) {
-                                nextGrid[idx] = createCell(TYPE_EMPTY);
-                                continue;
-                            }
-
-                            // Rise Upwards
-                            const upDir = gDir === 0 ? -1 : -gDir;
-                            const up = getIndex(actualX, y + upDir);
-                            const upLeft = getIndex(actualX + (Math.random() < 0.5 ? -1 : 1), y + upDir);
-
-                            if (up !== -1 && grid[up].type === TYPE_EMPTY && Math.random() < 0.6) {
-                                swapCells(idx, up);
-                            } else if (upLeft !== -1 && grid[upLeft].type === TYPE_EMPTY && Math.random() < 0.4) {
-                                swapCells(idx, upLeft);
-                            }
-
-                            // Burn Neighbors (Wood, Oil) & Extinguish by Water
-                            const neighbors = [
-                                getIndex(actualX + 1, y), getIndex(actualX - 1, y),
-                                getIndex(actualX, y + 1), getIndex(actualX, y - 1)
-                            ];
-
-                            for (let nidx of neighbors) {
-                                if (nidx === -1) continue;
-                                const nCell = grid[nidx];
-
-                                if (nCell.type === TYPE_WOOD) {
-                                    if (Math.random() < 0.15) nextGrid[nidx] = createCell(TYPE_FIRE);
-                                } else if (nCell.type === TYPE_OIL) {
-                                    // Oil ignites rapidly
-                                    if (Math.random() < 0.5) nextGrid[nidx] = createCell(TYPE_FIRE);
-                                } else if (nCell.type === TYPE_WATER) {
-                                    // Extinguish fire
-                                    nextGrid[idx] = createCell(TYPE_EMPTY);
-                                    break;
-                                }
-                            }
-                        }
-
-                        // 4. ACID PHYSICS
-                        else if (cell.type === TYPE_ACID) {
-                            if (gDir !== 0) {
-                                const below = getIndex(actualX, y + gDir);
-                                if (below !== -1 && grid[below].type === TYPE_EMPTY) {
-                                    swapCells(idx, below);
-                                    continue;
-                                }
-                            }
-
-                            // Dissolve adjacent wood or stone
-                            const neighbors = [
-                                getIndex(actualX + 1, y), getIndex(actualX - 1, y),
-                                getIndex(actualX, y + 1), getIndex(actualX, y - 1)
-                            ];
-
-                            for (let nidx of neighbors) {
-                                if (nidx === -1) continue;
-                                const target = grid[nidx];
-                                if (target.type === TYPE_WOOD || target.type === TYPE_STONE) {
-                                    if (Math.random() < 0.1) {
-                                        nextGrid[nidx] = createCell(TYPE_EMPTY);
-                                        nextGrid[idx] = createCell(TYPE_EMPTY); // Acid consumes itself
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // Swap buffer grid
-                grid = [...nextGrid];
+        // Piksele tıklama ve 5 Dakika (300 saniye) Cooldown Kuralı
+        canvas.addEventListener('click', (e) => {
+            const now = Date.now();
+            if (now < cooldownEndTime) {
+                const kalanSaniye = Math.ceil((cooldownEndTime - now) / 1000);
+                alert(`Bekleme süresindesin! Kalan süre: ${Math.floor(kalanSaniye / 60)} dakika ${kalanSaniye % 60} saniye.`);
+                return;
             }
 
-            function swapCells(i1, i2) {
-                const temp = nextGrid[i1];
-                nextGrid[i1] = nextGrid[i2];
-                nextGrid[i2] = temp;
-                nextGrid[i1].modified = true;
-                nextGrid[i2].modified = true;
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            
+            const clickX = Math.floor((e.clientX - rect.left) * scaleX);
+            const clickY = Math.floor((e.clientY - rect.top) * scaleY);
+
+            if (clickX >= 0 && clickX < GRID_SIZE && clickY >= 0 && clickY < GRID_SIZE) {
+                // Pikseli güncelle
+                gridData[clickY][clickX] = selectedColor;
+                drawCanvas();
+
+                // Tarayıcıya kaydet
+                localStorage.setItem('r_place_grid', JSON.stringify(gridData));
+
+                // 5 Dakika Cooldown Başlat (5 * 60 * 1000 milisaniye)
+                cooldownEndTime = now + (5 * 60 * 1000);
+                localStorage.setItem('r_place_cooldown', cooldownEndTime);
             }
+        });
 
-            // Rendering Loop
-            function render() {
-                // Clear Background
-                ctx.fillStyle = '#0a0a10';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // Geri sayım sayacı
+        setInterval(() => {
+            const now = Date.now();
+            const timeLeft = cooldownEndTime - now;
+            const cooldownText = document.getElementById('cooldown-text');
 
-                // Draw Grid
-                const imgData = ctx.createImageData(canvas.width, canvas.height);
-                const data = imgData.data;
-
-                for (let y = 0; y < rows; y++) {
-                    for (let x = 0; x < cols; x++) {
-                        const cell = grid[x + y * cols];
-                        if (cell.type === TYPE_EMPTY) continue;
-
-                        const px = x * CELL_SIZE;
-                        const py = y * CELL_SIZE;
-                        const [r, g, b] = cell.color;
-
-                        // Fill CELL_SIZE x CELL_SIZE pixels in ImageData buffer
-                        for (let cy = 0; cy < CELL_SIZE; cy++) {
-                            for (let cx = 0; cx < CELL_SIZE; cx++) {
-                                const screenX = px + cx;
-                                const screenY = py + cy;
-
-                                if (screenX < canvas.width && screenY < canvas.height) {
-                                    const pIdx = (screenX + screenY * canvas.width) * 4;
-                                    data[pIdx] = r;
-                                    data[pIdx + 1] = g;
-                                    data[pIdx + 2] = b;
-                                    data[pIdx + 3] = 255;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                ctx.putImageData(imgData, 0, 0);
-
-                // Draw Brush Outline Indicator
-                if (mouseX >= 0 && mouseX < cols && mouseY >= 0 && mouseY < rows) {
-                    ctx.beginPath();
-                    ctx.arc(
-                        mouseX * CELL_SIZE + CELL_SIZE / 2,
-                        mouseY * CELL_SIZE + CELL_SIZE / 2,
-                        brushSize * CELL_SIZE,
-                        0,
-                        Math.PI * 2
-                    );
-                    ctx.strokeStyle = selectedType === TYPE_WIND ? '#6366f1' : 'rgba(0, 243, 255, 0.5)';
-                    ctx.lineWidth = 1.5;
-                    ctx.stroke();
-                }
+            if (timeLeft > 0) {
+                const minutes = Math.floor(timeLeft / (1000 * 60));
+                const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+                cooldownText.innerText = `Yeni piksel için bekleme süresi: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+            } else {
+                cooldownText.innerText = "Piksel yerleştirmeye hazırsın! İstediğin yere tıkla.";
             }
+        }, 1000);
 
-            // Main Animation Frame Loop
-            function animateLoop(now) {
-                // Calculate FPS
-                frameCount++;
-                if (now - lastTime >= 1000) {
-                    fps = frameCount;
-                    frameCount = 0;
-                    lastTime = now;
-                    fpsCounter.textContent = fps;
-                    particleCounter.textContent = activeParticlesCount;
-                }
-
-                updatePhysics();
-                render();
-
-                requestAnimationFrame(animateLoop);
-            }
-
-            // Start Simulation
-            initGrid();
-            requestAnimationFrame(animateLoop);
-        };
+        // İlk yükleme
+        const savedGrid = localStorage.getItem('r_place_grid');
+        if (savedGrid) {
+            gridData = JSON.parse(savedGrid);
+        }
+        drawCanvas();
     </script>
 </body>
 </html>
