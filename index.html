@@ -241,16 +241,16 @@
 
     <section class="hero">
         <div class="hero-text">
-            <span class="badge-free">GOOGLE DRIVE İNDİRME</span>
+            <span class="badge-free">GOOGLE DRIVE ARŞİVİ</span>
             <h1>cvassylo Oyun Mağazasına Hoş Geldin</h1>
-            <p>İndir butonuna bastığın an doğrudan dosya indirmesini başlatan özel platformun.</p>
+            <p>Gang Beasts ve ekleyeceğin diğer oyunları güvenle indirebileceğin platform.</p>
         </div>
     </section>
 
     <main>
         <h2 class="section-title">Mevcut Oyunlar</h2>
         <div class="games-grid" id="gamesGrid">
-            <!-- Oyun kartları otomatik yüklenir -->
+            <!-- Oyun kartları buraya yüklenir -->
         </div>
     </main>
 
@@ -259,7 +259,7 @@
     </footer>
 
     <script>
-        // OYUN LİSTESİ (Direkt indirme bağlantısı ile güncellendi)
+        // OYUN LİSTESİ
         const games = [
             {
                 title: "Gang Beasts",
@@ -268,8 +268,7 @@
                 description: "Renkli ve pelte gibi karakterlerle arkadaşlarını ringden, çatılardan ve tehlikeli platformlardan aşağı atmaya çalıştığın eğlenceli dövüş oyunu.",
                 bannerGradient: "linear-gradient(135deg, #ff4757, #ff6b81)",
                 status: "İNDİR",
-                // Klasör yerine doğrudan dosyayı indiren Google Drive Direct-Download bağlantısı:
-                downloadUrl: "https://drive.google.com/uc?export=download&id=15Fnq7zUoVlSCDtfdpEzUi8FUrWU8NHlw"
+                downloadUrl: "https://drive.google.com/drive/folders/15Fnq7zUoVlSCDtfdpEzUi8FUrWU8NHlw?usp=sharing"
             }
         ];
 
@@ -292,8 +291,8 @@
                             <span>Tür: ${game.category}</span>
                             <span>Boyut: ${game.size}</span>
                         </div>
-                        <button class="download-btn" onclick="window.location.href='${game.downloadUrl}'">
-                            Hemen İndir
+                        <button class="download-btn" onclick="window.open('${game.downloadUrl}', '_blank')">
+                            Klasörden İndir
                         </button>
                     </div>
                 `;
