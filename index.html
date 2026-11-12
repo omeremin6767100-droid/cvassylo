@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ücretsiz Oyun Mağazası</title>
+    <title>cvassylo - Oyun Mağazası</title>
     <style>
         * {
             box-sizing: border-box;
@@ -44,7 +44,7 @@
         }
 
         .logo span {
-            background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+            background: linear-gradient(90deg, #ff4757, #ff6b81);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -61,8 +61,8 @@
         }
 
         .search-box input:focus {
-            border-color: #00d2ff;
-            box-shadow: 0 0 10px rgba(0, 210, 255, 0.2);
+            border-color: #ff4757;
+            box-shadow: 0 0 10px rgba(255, 71, 87, 0.2);
         }
 
         /* Vitrin Banner */
@@ -111,7 +111,7 @@
             font-size: 20px;
             margin-bottom: 20px;
             color: #e4e6eb;
-            border-left: 4px solid #00d2ff;
+            border-left: 4px solid #ff4757;
             padding-left: 12px;
         }
 
@@ -134,7 +134,7 @@
 
         .game-card:hover {
             transform: translateY(-6px);
-            border-color: #00d2ff;
+            border-color: #ff4757;
         }
 
         .game-cover {
@@ -155,12 +155,12 @@
             top: 12px;
             right: 12px;
             background-color: rgba(0, 0, 0, 0.75);
-            color: #ff9f43;
+            color: #2ed573;
             padding: 5px 10px;
             border-radius: 6px;
             font-size: 12px;
             font-weight: bold;
-            border: 1px solid #ff9f43;
+            border: 1px solid #2ed573;
         }
 
         .game-info {
@@ -195,7 +195,7 @@
         }
 
         .download-btn {
-            background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+            background: linear-gradient(90deg, #ff4757, #ff6b81);
             color: #ffffff;
             border: none;
             padding: 12px;
@@ -213,67 +213,6 @@
 
         .download-btn:active {
             transform: scale(0.98);
-        }
-
-        /* Özel Uyarı Penceresi (Modal) */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.75);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            backdrop-filter: blur(4px);
-        }
-
-        .modal-box {
-            background: #1b1e2b;
-            border: 1px solid #353a50;
-            padding: 30px 40px;
-            border-radius: 16px;
-            text-align: center;
-            max-width: 400px;
-            width: 90%;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-            animation: popIn 0.2s ease-out;
-        }
-
-        @keyframes popIn {
-            from { transform: scale(0.85); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-
-        .modal-icon {
-            font-size: 42px;
-            margin-bottom: 12px;
-        }
-
-        .modal-title {
-            font-size: 22px;
-            font-weight: 800;
-            margin-bottom: 8px;
-            color: #ff9f43;
-        }
-
-        .modal-msg {
-            color: #c8cce0;
-            font-size: 15px;
-            margin-bottom: 22px;
-        }
-
-        .modal-close {
-            background: #2ed573;
-            color: #000;
-            border: none;
-            padding: 10px 28px;
-            border-radius: 8px;
-            font-weight: 800;
-            cursor: pointer;
-            font-size: 14px;
         }
 
         footer {
@@ -294,7 +233,7 @@
 <body>
 
     <header>
-        <div class="logo">🎮 <span>GAMEHUB</span> STORE</div>
+        <div class="logo">🎮 <span>cvassylo</span></div>
         <div class="search-box">
             <input type="text" id="searchInput" placeholder="Oyun ara..." onkeyup="filterGames()">
         </div>
@@ -302,35 +241,25 @@
 
     <section class="hero">
         <div class="hero-text">
-            <span class="badge-free">%100 ÜCRETSİZ ARŞİV</span>
-            <h1>En Eğlenceli Oyunlar Tek Yerde</h1>
-            <p>Seçtiğimiz en iyi çok oyunculu ve eğlenceli oyunları kolayca incele ve indir. Yeni oyunlar çok yakında eklenecek!</p>
+            <span class="badge-free">GOOGLE DRIVE ARŞİVİ</span>
+            <h1>cvassylo Oyun Mağazasına Hoş Geldin</h1>
+            <p>Paylaştığın Google Drive klasöründeki oyunları doğrudan tek tıkla indirebileceğin özel platformun.</p>
         </div>
     </section>
 
     <main>
-        <h2 class="section-title">Tüm Oyunlar</h2>
+        <h2 class="section-title">Mevcut Oyunlar</h2>
         <div class="games-grid" id="gamesGrid">
-            <!-- Oyun kartları JavaScript ile buraya otomatik eklenir -->
+            <!-- Oyun kartları otomatik yüklenir -->
         </div>
     </main>
 
-    <!-- Uyarı Penceresi -->
-    <div class="modal-overlay" id="alertModal" onclick="closeModal()">
-        <div class="modal-box" onclick="event.stopPropagation()">
-            <div class="modal-icon">⏳</div>
-            <div class="modal-title" id="modalTitle">Gang Beasts</div>
-            <div class="modal-msg" id="modalMessage">Daha gelmedi!</div>
-            <button class="modal-close" onclick="closeModal()">Tamam</button>
-        </div>
-    </div>
-
     <footer>
-        Ücretsiz Oyun İndirme Platformu &copy; 2026
+        cvassylo Oyun Platformu &copy; 2026
     </footer>
 
     <script>
-        // OYUN LİSTESİ (Yeni oyunları buraya ekleyebilirsin)
+        // OYUN LİSTESİ (Drive linkin buraya eklenmiştir)
         const games = [
             {
                 title: "Gang Beasts",
@@ -338,9 +267,8 @@
                 size: "2.1 GB",
                 description: "Renkli ve pelte gibi karakterlerle arkadaşlarını ringden, çatılardan ve tehlikeli platformlardan aşağı atmaya çalıştığın eğlenceli dövüş oyunu.",
                 bannerGradient: "linear-gradient(135deg, #ff4757, #ff6b81)",
-                status: "YAKINDA",
-                comingSoon: true, // true olduğu sürece tıklandığında "Daha gelmedi" yazar
-                downloadUrl: "#"
+                status: "İNDİRİLEBİLİR",
+                downloadUrl: "https://drive.google.com/drive/folders/15Fnq7zUoVlSCDtfdpEzUi8FUrWU8NHlw?usp=drive_link"
             }
         ];
 
@@ -363,27 +291,13 @@
                             <span>Tür: ${game.category}</span>
                             <span>Boyut: ${game.size}</span>
                         </div>
-                        <button class="download-btn" onclick="handleDownload('${game.title}', ${game.comingSoon}, '${game.downloadUrl}')">
-                            İndir
+                        <button class="download-btn" onclick="window.open('${game.downloadUrl}', '_blank')">
+                            İndir (Drive)
                         </button>
                     </div>
                 `;
                 gamesGrid.appendChild(card);
             });
-        }
-
-        function handleDownload(title, isComingSoon, url) {
-            if (isComingSoon) {
-                document.getElementById('modalTitle').innerText = title;
-                document.getElementById('modalMessage').innerText = "Daha gelmedi!";
-                document.getElementById('alertModal').style.display = 'flex';
-            } else {
-                window.open(url, '_blank');
-            }
-        }
-
-        function closeModal() {
-            document.getElementById('alertModal').style.display = 'none';
         }
 
         function filterGames() {
