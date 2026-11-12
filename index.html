@@ -3,875 +3,397 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2D Side-View Pixel Co-Op Sandbox</title>
+    <title>Ücretsiz Oyun Mağazası</title>
     <style>
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            user-select: none;
-            font-family: 'Courier New', Courier, monospace;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
+
         body {
-            background-color: #111;
-            overflow: hidden;
-            width: 100vw;
-            height: 100vh;
+            background-color: #0f1015;
+            color: #ffffff;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
-        #ui-bar {
-            height: 44px;
-            background: #1e272e;
-            border-bottom: 3px solid #0fbcf9;
-            color: #fff;
+
+        /* Üst Menü (Navbar) */
+        header {
+            background-color: #161822;
+            border-bottom: 1px solid #262938;
+            padding: 18px 40px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 15px;
-            font-size: 13px;
-            font-weight: bold;
-            z-index: 10;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
-        .p1-badge { color: #ff4757; }
-        .p2-badge { color: #1e90ff; }
-        .reset-btn {
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo span {
+            background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .search-box input {
+            background-color: #202330;
+            border: 1px solid #32364a;
+            color: #fff;
+            padding: 10px 18px;
+            border-radius: 25px;
+            width: 280px;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        .search-box input:focus {
+            border-color: #00d2ff;
+            box-shadow: 0 0 10px rgba(0, 210, 255, 0.2);
+        }
+
+        /* Vitrin Banner */
+        .hero {
+            background: linear-gradient(135deg, #1b1e2b 0%, #12141d 100%);
+            margin: 30px 40px 10px 40px;
+            padding: 40px;
+            border-radius: 16px;
+            border: 1px solid #2a2e42;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .hero-text h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .hero-text p {
+            color: #a0a5b8;
+            font-size: 16px;
+            max-width: 550px;
+        }
+
+        .badge-free {
+            background-color: #2ed573;
+            color: #000;
+            font-weight: 800;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            display: inline-block;
+            margin-bottom: 12px;
+        }
+
+        /* Oyun Listesi Alanı */
+        main {
+            padding: 20px 40px 50px 40px;
+            flex: 1;
+        }
+
+        .section-title {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: #e4e6eb;
+            border-left: 4px solid #00d2ff;
+            padding-left: 12px;
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+            gap: 25px;
+        }
+
+        /* Oyun Kartı */
+        .game-card {
+            background-color: #181a24;
+            border: 1px solid #272a3a;
+            border-radius: 14px;
+            overflow: hidden;
+            transition: transform 0.25s ease, border-color 0.25s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .game-card:hover {
+            transform: translateY(-6px);
+            border-color: #00d2ff;
+        }
+
+        .game-cover {
+            height: 170px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            position: relative;
+        }
+
+        .status-tag {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background-color: rgba(0, 0, 0, 0.75);
+            color: #ff9f43;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            border: 1px solid #ff9f43;
+        }
+
+        .game-info {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .game-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .game-desc {
+            color: #9ba0b5;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 18px;
+            flex: 1;
+        }
+
+        .game-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #74798c;
+            margin-bottom: 15px;
+            padding-top: 12px;
+            border-top: 1px solid #252836;
+        }
+
+        .download-btn {
+            background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+            color: #ffffff;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+            width: 100%;
+        }
+
+        .download-btn:hover {
+            opacity: 0.9;
+        }
+
+        .download-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Özel Uyarı Penceresi (Modal) */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-box {
+            background: #1b1e2b;
+            border: 1px solid #353a50;
+            padding: 30px 40px;
+            border-radius: 16px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            animation: popIn 0.2s ease-out;
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.85); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-icon {
+            font-size: 42px;
+            margin-bottom: 12px;
+        }
+
+        .modal-title {
+            font-size: 22px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            color: #ff9f43;
+        }
+
+        .modal-msg {
+            color: #c8cce0;
+            font-size: 15px;
+            margin-bottom: 22px;
+        }
+
+        .modal-close {
             background: #2ed573;
             color: #000;
             border: none;
-            padding: 6px 14px;
-            font-weight: bold;
+            padding: 10px 28px;
+            border-radius: 8px;
+            font-weight: 800;
             cursor: pointer;
-            border-radius: 4px;
-            font-family: inherit;
+            font-size: 14px;
         }
-        .reset-btn:hover { background: #7bed9f; }
-        canvas {
-            display: block;
-            width: 100%;
-            height: calc(100vh - 44px);
-            image-rendering: pixelated;
-            image-rendering: crisp-edges;
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #5c6175;
+            font-size: 13px;
+            border-top: 1px solid #1c1f2b;
+        }
+
+        @media (max-width: 600px) {
+            header { flex-direction: column; gap: 15px; padding: 15px 20px; }
+            .hero, main { margin: 15px 20px; padding: 20px; }
+            .search-box input { width: 100%; }
         }
     </style>
 </head>
 <body>
 
-    <div id="ui-bar">
-        <div class="p1-badge">P1: A-D Yürü/Sür | W Zıpla | F Bin/İn | SPACE Turbo</div>
-        <button class="reset-btn" onclick="resetGame()">YENİDEN BAŞLAT (R)</button>
-        <div class="p2-badge">P2: ◄-► Yürü/Sür | ▲ Zıpla | ENTER Bin/İn | SHIFT Turbo</div>
+    <header>
+        <div class="logo">🎮 <span>GAMEHUB</span> STORE</div>
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Oyun ara..." onkeyup="filterGames()">
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="hero-text">
+            <span class="badge-free">%100 ÜCRETSİZ ARŞİV</span>
+            <h1>En Eğlenceli Oyunlar Tek Yerde</h1>
+            <p>Seçtiğimiz en iyi çok oyunculu ve eğlenceli oyunları kolayca incele ve indir. Yeni oyunlar çok yakında eklenecek!</p>
+        </div>
+    </section>
+
+    <main>
+        <h2 class="section-title">Tüm Oyunlar</h2>
+        <div class="games-grid" id="gamesGrid">
+            <!-- Oyun kartları JavaScript ile buraya otomatik eklenir -->
+        </div>
+    </main>
+
+    <!-- Uyarı Penceresi -->
+    <div class="modal-overlay" id="alertModal" onclick="closeModal()">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div class="modal-icon">⏳</div>
+            <div class="modal-title" id="modalTitle">Gang Beasts</div>
+            <div class="modal-msg" id="modalMessage">Daha gelmedi!</div>
+            <button class="modal-close" onclick="closeModal()">Tamam</button>
+        </div>
     </div>
 
-    <canvas id="gameCanvas"></canvas>
+    <footer>
+        Ücretsiz Oyun İndirme Platformu &copy; 2026
+    </footer>
 
     <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-
-        function resize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight - 44;
-        }
-        window.addEventListener('resize', resize);
-        resize();
-
-        // DÜNYA AYARLARI (Devasa Yandan Bakış Bahçe)
-        const WORLD_W = 5500;
-        const GROUND_Y = 750;
-        const GRAVITY = 0.55;
-
-        // Klavye Durumu
-        const keys = {};
-        window.addEventListener('keydown', e => {
-            if (!keys[e.code]) {
-                keys[e.code] = true;
-                // P1 Bin/İn (F Tuşu)
-                if (e.code === 'KeyF') toggleVehicle(p1);
-                // P2 Bin/İn (Enter veya Sağ Shift)
-                if (e.code === 'Enter' || e.code === 'ShiftRight') toggleVehicle(p2);
-                // Reset
-                if (e.code === 'KeyR') resetGame();
+        // OYUN LİSTESİ (Yeni oyunları buraya ekleyebilirsin)
+        const games = [
+            {
+                title: "Gang Beasts",
+                category: "Parti / Çok Oyunculu",
+                size: "2.1 GB",
+                description: "Renkli ve pelte gibi karakterlerle arkadaşlarını ringden, çatılardan ve tehlikeli platformlardan aşağı atmaya çalıştığın eğlenceli dövüş oyunu.",
+                bannerGradient: "linear-gradient(135deg, #ff4757, #ff6b81)",
+                status: "YAKINDA",
+                comingSoon: true, // true olduğu sürece tıklandığında "Daha gelmedi" yazar
+                downloadUrl: "#"
             }
-        });
-        window.addEventListener('keyup', e => {
-            keys[e.code] = false;
-        });
+        ];
 
-        let particles = [];
-        let ramps = [];
-        let crates = [];
-        let balls = [];
-        let trees = [];
-        let clouds = [];
+        const gamesGrid = document.getElementById('gamesGrid');
 
-        // Garaj Konumu (Sol tarafta başlangıç noktası)
-        const GARAGE = { x: 120, y: GROUND_Y - 170, w: 460, h: 170 };
-
-        // Araç Sınıfı (Yandan Bakış Fizikli)
-        class Car {
-            constructor(x, y, color, stripeColor, mass, maxSpeed) {
-                this.startX = x;
-                this.startY = y;
-                this.color = color;
-                this.stripeColor = stripeColor;
-                this.mass = mass;
-                this.maxSpeed = maxSpeed;
-                this.w = 96;
-                this.h = 42;
-                this.reset();
-            }
-
-            reset() {
-                this.x = this.startX;
-                this.y = this.startY;
-                this.vx = 0;
-                this.vy = 0;
-                this.angle = 0;
-                this.angularVel = 0;
-                this.driver = null;
-                this.onGround = false;
-                this.nitro = 100;
-                this.wheelRot = 0;
-            }
-
-            update() {
-                let throttle = 0;
-                let turbo = false;
-
-                if (this.driver) {
-                    const c = this.driver.controls;
-                    if (keys[c.right]) throttle += 1;
-                    if (keys[c.left]) throttle -= 1;
-                    if (keys[c.turbo] && this.nitro > 0 && throttle !== 0) {
-                        turbo = true;
-                        this.nitro = Math.max(0, this.nitro - 0.8);
-                    }
-                }
-
-                if (!turbo) {
-                    this.nitro = Math.min(100, this.nitro + 0.25);
-                }
-
-                // Havada Eğim Kontrolü (Ön/Arka Kaldırma)
-                if (!this.onGround && this.driver) {
-                    this.angularVel += throttle * 0.004;
-                    this.angularVel *= 0.94;
-                }
-
-                // Yerçekimi
-                this.vy += GRAVITY;
-
-                // Hareket Uygula
-                this.x += this.vx;
-                this.y += this.vy;
-                this.angle += this.angularVel;
-
-                // Zemin ve Rampa Yüksekliği Hesapla (Ön ve Arka Tekerlek Pozisyonu)
-                const wheelOffset = 32;
-                const frontX = this.x + Math.cos(this.angle) * wheelOffset;
-                const rearX = this.x - Math.cos(this.angle) * wheelOffset;
-
-                const groundFront = getTerrainHeight(frontX);
-                const groundRear = getTerrainHeight(rearX);
-                const targetGroundY = Math.min(groundFront, groundRear) - 24;
-
-                // Zemin Teması ve Rampa Açısı
-                if (this.y >= targetGroundY) {
-                    // Rampa/Tepe eğimini hesapla
-                    const slopeAngle = Math.atan2(groundFront - groundRear, wheelOffset * 2);
-                    
-                    // Eğer hızlıysa rampanın ucundan havalan!
-                    const prevGround = getTerrainHeight(this.x - this.vx);
-                    if (prevGround - getTerrainHeight(this.x) < -12 && Math.abs(this.vx) > 7) {
-                        // Rampadan fırlama
-                        this.vy = -Math.abs(this.vx) * 0.65;
-                        this.onGround = false;
-                    } else {
-                        this.y = targetGroundY;
-                        
-                        // Yere iniş sarsıntısı / süspansiyon
-                        if (this.vy > 4) {
-                            spawnDust(this.x, this.y + 20, 8);
-                        }
-                        this.vy = 0;
-                        this.onGround = true;
-
-                        // Arabanın açısını zemine yumuşakça hizala
-                        this.angle += (slopeAngle - this.angle) * 0.25;
-                        this.angularVel = 0;
-
-                        // Motor Hızlanması
-                        const accel = turbo ? 0.65 : 0.35;
-                        const limit = turbo ? this.maxSpeed * 1.45 : this.maxSpeed;
-
-                        if (throttle !== 0) {
-                            this.vx += throttle * accel;
-                            if (this.vx > limit) this.vx = limit;
-                            if (this.vx < -limit * 0.7) this.vx = -limit * 0.7;
-                        } else {
-                            // Sürtünme (Frenleme)
-                            this.vx *= 0.94;
-                            if (Math.abs(this.vx) < 0.1) this.vx = 0;
-                        }
-
-                        // Yokuş yukarı/aşağı yerçekimi etkisi
-                        this.vx += Math.sin(slopeAngle) * 0.35;
-
-                        // Egzoz Dumanı / Turbo Ateşi
-                        if (turbo || (Math.abs(throttle) > 0 && Math.random() < 0.3)) {
-                            const dir = this.vx >= 0 ? -1 : 1;
-                            particles.push({
-                                x: this.x + dir * 48,
-                                y: this.y + 8,
-                                vx: dir * (2 + Math.random() * 2),
-                                vy: -0.5 - Math.random(),
-                                size: turbo ? 8 : 5,
-                                color: turbo ? '#ff9f43' : '#dfe4ea',
-                                life: 16
-                            });
-                        }
-                    }
-                } else {
-                    this.onGround = false;
-                    // Hava sürtünmesi
-                    this.vx *= 0.992;
-                }
-
-                // Tekerlek dönüş animasyonu
-                this.wheelRot += this.vx * 0.08;
-
-                // Dünya Sınırları (Çitlerden Sekme)
-                if (this.x < 55) { this.x = 55; this.vx *= -0.5; }
-                if (this.x > WORLD_W - 55) { this.x = WORLD_W - 55; this.vx *= -0.5; }
-
-                // Sürücü arabanın içindeyse pozisyonunu arabaya kilitle
-                if (this.driver) {
-                    this.driver.x = this.x;
-                    this.driver.y = this.y - 10;
-                    this.driver.vx = this.vx;
-                    this.driver.vy = this.vy;
-                }
-            }
-
-            draw(ctx) {
-                ctx.save();
-                ctx.translate(this.x, this.y);
-                ctx.rotate(this.angle);
-
-                // Gövde Alt Şasi
-                ctx.fillStyle = '#2f3542';
-                ctx.fillRect(-44, 4, 88, 10);
-
-                // Ana Piksel Gövde
-                ctx.fillStyle = this.color;
-                ctx.fillRect(-46, -12, 92, 18);
-                // Kabin / Üst Kısım
-                ctx.fillRect(-24, -26, 46, 15);
-
-                // Gövde Kontur (Piksel Kenarlık)
-                ctx.strokeStyle = '#000';
-                ctx.lineWidth = 2;
-                ctx.strokeRect(-46, -12, 92, 18);
-                ctx.strokeRect(-24, -26, 46, 15);
-
-                // Yarış Şeridi
-                ctx.fillStyle = this.stripeColor;
-                ctx.fillRect(-44, -4, 88, 5);
-
-                // Pencereler (Sürücü varsa içeride kafası görünür)
-                ctx.fillStyle = '#48dbfb';
-                ctx.fillRect(-20, -23, 16, 10);
-                ctx.fillRect(0, -23, 18, 10);
-
-                if (this.driver) {
-                    ctx.fillStyle = this.driver.skinColor;
-                    ctx.fillRect(4, -21, 8, 8);
-                    ctx.fillStyle = this.driver.hatColor;
-                    ctx.fillRect(3, -23, 10, 3);
-                }
-
-                // Ön Far ve Arka Stop
-                ctx.fillStyle = '#feca57';
-                ctx.fillRect(43, -9, 4, 6);
-                ctx.fillStyle = '#ff3f34';
-                ctx.fillRect(-47, -9, 4, 6);
-
-                // Tekerlekler (Süspansiyonlu Piksel Teker)
-                this.drawWheel(ctx, -30, 14);
-                this.drawWheel(ctx, 30, 14);
-
-                ctx.restore();
-
-                // Nitro Barı
-                if (this.driver && this.nitro < 100) {
-                    ctx.fillStyle = 'rgba(0,0,0,0.6)';
-                    ctx.fillRect(this.x - 25, this.y - 42, 50, 6);
-                    ctx.fillStyle = '#ff9f43';
-                    ctx.fillRect(this.x - 24, this.y - 41, 48 * (this.nitro / 100), 4);
-                }
-            }
-
-            drawWheel(ctx, wx, wy) {
-                ctx.save();
-                ctx.translate(wx, wy);
-                ctx.rotate(this.wheelRot);
-                ctx.fillStyle = '#1e272e';
-                ctx.beginPath();
-                ctx.arc(0, 0, 13, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.strokeStyle = '#000';
-                ctx.lineWidth = 2;
-                ctx.stroke();
-
-                // Jant
-                ctx.fillStyle = '#d2dae2';
-                ctx.fillRect(-5, -5, 10, 10);
-                ctx.fillStyle = '#57606f';
-                ctx.fillRect(-2, -2, 4, 4);
-                ctx.restore();
-            }
+        function renderGames(list) {
+            gamesGrid.innerHTML = "";
+            list.forEach(game => {
+                const card = document.createElement('div');
+                card.className = 'game-card';
+                card.innerHTML = `
+                    <div class="game-cover" style="background: ${game.bannerGradient};">
+                        ${game.status ? `<span class="status-tag">${game.status}</span>` : ''}
+                        ${game.title}
+                    </div>
+                    <div class="game-info">
+                        <div class="game-title">${game.title}</div>
+                        <div class="game-desc">${game.description}</div>
+                        <div class="game-meta">
+                            <span>Tür: ${game.category}</span>
+                            <span>Boyut: ${game.size}</span>
+                        </div>
+                        <button class="download-btn" onclick="handleDownload('${game.title}', ${game.comingSoon}, '${game.downloadUrl}')">
+                            İndir
+                        </button>
+                    </div>
+                `;
+                gamesGrid.appendChild(card);
+            });
         }
 
-        // İnsan (Karakter) Sınıfı
-        class Player {
-            constructor(name, x, y, shirtColor, hatColor, controls) {
-                this.name = name;
-                this.startX = x;
-                this.startY = y;
-                this.shirtColor = shirtColor;
-                this.hatColor = hatColor;
-                this.skinColor = '#ffcccc';
-                this.controls = controls;
-                this.w = 18;
-                this.h = 34;
-                this.reset();
-            }
-
-            reset() {
-                this.x = this.startX;
-                this.y = this.startY;
-                this.vx = 0;
-                this.vy = 0;
-                this.inCar = null;
-                this.facing = 1;
-                this.onGround = false;
-                this.walkFrame = 0;
-            }
-
-            update() {
-                if (this.inCar) return; // Arabadaysa araba kontrol eder
-
-                // Yürüme
-                let move = 0;
-                if (keys[this.controls.right]) { move += 1; this.facing = 1; }
-                if (keys[this.controls.left]) { move -= 1; this.facing = -1; }
-
-                this.vx = move * 4.5;
-
-                // Zıplama
-                if (keys[this.controls.up] && this.onGround) {
-                    this.vy = -10.5;
-                    this.onGround = false;
-                }
-
-                // Yerçekimi
-                this.vy += GRAVITY;
-
-                this.x += this.vx;
-                this.y += this.vy;
-
-                // Yürüme Animasyonu
-                if (Math.abs(this.vx) > 0.1 && this.onGround) {
-                    this.walkFrame += 0.25;
-                } else {
-                    this.walkFrame = 0;
-                }
-
-                // Zemin / Rampa Çarpışması
-                const groundH = getTerrainHeight(this.x);
-                if (this.y + this.h / 2 >= groundH) {
-                    this.y = groundH - this.h / 2;
-                    this.vy = 0;
-                    this.onGround = true;
-                } else {
-                    this.onGround = false;
-                }
-
-                // Dünya Sınırları
-                if (this.x < 30) this.x = 30;
-                if (this.x > WORLD_W - 30) this.x = WORLD_W - 30;
-            }
-
-            draw(ctx) {
-                if (this.inCar) return; // Arabanın içindeyken dışarıda çizilmez
-
-                ctx.save();
-                ctx.translate(this.x, this.y);
-
-                // Gölge
-                ctx.fillStyle = 'rgba(0,0,0,0.3)';
-                ctx.fillRect(-10, this.h / 2 - 2, 20, 4);
-
-                // Bacaklar (Yürüme animasyonlu piksel)
-                const legSwing = Math.sin(this.walkFrame) * 5;
-                ctx.fillStyle = '#2f3542';
-                ctx.fillRect(-6 + legSwing, 4, 5, 13);
-                ctx.fillRect(1 - legSwing, 4, 5, 13);
-
-                // Gövde (Tişört)
-                ctx.fillStyle = this.shirtColor;
-                ctx.fillRect(-8, -8, 16, 13);
-                ctx.strokeStyle = '#000';
-                ctx.lineWidth = 1.5;
-                ctx.strokeRect(-8, -8, 16, 13);
-
-                // Kafa
-                ctx.fillStyle = this.skinColor;
-                ctx.fillRect(-7, -20, 14, 12);
-                ctx.strokeRect(-7, -20, 14, 12);
-
-                // Şapka
-                ctx.fillStyle = this.hatColor;
-                ctx.fillRect(-8, -23, 16, 4);
-                if (this.facing === 1) ctx.fillRect(4, -21, 6, 2);
-                else ctx.fillRect(-10, -21, 6, 2);
-
-                // Göz
-                ctx.fillStyle = '#000';
-                const eyeX = this.facing === 1 ? 2 : -5;
-                ctx.fillRect(eyeX, -16, 3, 3);
-
-                ctx.restore();
-
-                // Eğer boş bir arabanın yanındaysa üzerinde "F" veya "ENTER" ipucu göster
-                const nearCar = getNearestCar(this);
-                if (nearCar) {
-                    ctx.fillStyle = 'rgba(0,0,0,0.75)';
-                    ctx.fillRect(this.x - 35, this.y - 46, 70, 18);
-                    ctx.fillStyle = '#2ed573';
-                    ctx.font = 'bold 11px Courier New';
-                    ctx.textAlign = 'center';
-                    const keyLabel = this === p1 ? '[F] BİN' : '[ENTER] BİN';
-                    ctx.fillText(keyLabel, this.x, this.y - 33);
-                }
-            }
-        }
-
-        // Oyuncuları ve Arabaları Oluştur (Garajın İçinde Başlarlar)
-        const p1 = new Player('P1', GARAGE.x + 60, GROUND_Y - 20, '#ff4757', '#ff6b81', {
-            left: 'KeyA', right: 'KeyD', up: 'KeyW', down: 'KeyS', turbo: 'Space'
-        });
-
-        const p2 = new Player('P2', GARAGE.x + 400, GROUND_Y - 20, '#1e90ff', '#70a1ff', {
-            left: 'ArrowLeft', right: 'ArrowRight', up: 'ArrowUp', down: 'ArrowDown', turbo: 'ShiftRight'
-        });
-
-        const car1 = new Car(GARAGE.x + 165, GROUND_Y - 25, '#ff4757', '#ffffff', 1.0, 13.5);
-        const car2 = new Car(GARAGE.x + 305, GROUND_Y - 25, '#1e90ff', '#feca57', 1.25, 13.0);
-        const cars = [car1, car2];
-
-        // Yakındaki Arabayı Bulma
-        function getNearestCar(player) {
-            for (let car of cars) {
-                if (!car.driver && Math.abs(player.x - car.x) < 75 && Math.abs(player.y - car.y) < 60) {
-                    return car;
-                }
-            }
-            return null;
-        }
-
-        // Arabaya Binme / İnme Fonksiyonu
-        function toggleVehicle(player) {
-            if (player.inCar) {
-                // Arabadan İn
-                const car = player.inCar;
-                player.inCar = null;
-                car.driver = null;
-                player.x = car.x;
-                player.y = car.y - 35;
-                player.vy = -5; // Hafif zıplayarak insin
+        function handleDownload(title, isComingSoon, url) {
+            if (isComingSoon) {
+                document.getElementById('modalTitle').innerText = title;
+                document.getElementById('modalMessage').innerText = "Daha gelmedi!";
+                document.getElementById('alertModal').style.display = 'flex';
             } else {
-                // Yakında boş araba varsa Bin
-                const car = getNearestCar(player);
-                if (car) {
-                    player.inCar = car;
-                    car.driver = player;
-                }
+                window.open(url, '_blank');
             }
         }
 
-        // Zemin ve Rampa Yüksekliği Hesaplama
-        function getTerrainHeight(x) {
-            let h = GROUND_Y;
-            // Rampaların üzerindeyse yüksekliği rampaya göre ayarla
-            for (let r of ramps) {
-                if (x >= r.x && x <= r.x + r.w) {
-                    const progress = (x - r.x) / r.w;
-                    if (r.dir === 'RIGHT') {
-                        h = Math.min(h, GROUND_Y - progress * r.h);
-                    } else {
-                        h = Math.min(h, GROUND_Y - (1 - progress) * r.h);
-                    }
-                }
-            }
-            return h;
+        function closeModal() {
+            document.getElementById('alertModal').style.display = 'none';
         }
 
-        // Harita Objelerini Oluştur
-        function initWorld() {
-            ramps = [
-                { x: 850,  w: 220, h: 75,  dir: 'RIGHT' },
-                { x: 1120, w: 220, h: 75,  dir: 'LEFT' },
-                { x: 1800, w: 280, h: 110, dir: 'RIGHT' },
-                { x: 2500, w: 260, h: 95,  dir: 'LEFT' },
-                { x: 3100, w: 300, h: 125, dir: 'RIGHT' },
-                { x: 3450, w: 300, h: 125, dir: 'LEFT' },
-                { x: 4300, w: 250, h: 90,  dir: 'RIGHT' }
-            ];
-
-            balls = [
-                { x: 1450, y: GROUND_Y - 40, vx: 0, vy: 0, radius: 32, color: '#ff9ff3' },
-                { x: 2850, y: GROUND_Y - 40, vx: 0, vy: 0, radius: 38, color: '#feca57' },
-                { x: 4000, y: GROUND_Y - 40, vx: 0, vy: 0, radius: 35, color: '#48dbfb' }
-            ];
-
-            crates = [];
-            const crateSpots = [720, 755, 735, 1600, 1635, 2250, 2285, 2265, 3850, 3885, 4700];
-            crateSpots.forEach((cx, idx) => {
-                crates.push({
-                    x: cx,
-                    y: GROUND_Y - 20 - (idx % 2) * 32,
-                    vx: 0,
-                    vy: 0,
-                    size: 30
-                });
-            });
-
-            trees = [];
-            for (let tx = 700; tx < WORLD_W - 200; tx += 380) {
-                trees.push({ x: tx + Math.random() * 120, h: 110 + Math.random() * 50 });
-            }
-
-            clouds = [];
-            for (let i = 0; i < 25; i++) {
-                clouds.push({
-                    x: Math.random() * WORLD_W,
-                    y: 120 + Math.random() * 250,
-                    w: 90 + Math.random() * 80,
-                    speed: 0.2 + Math.random() * 0.3
-                });
-            }
+        function filterGames() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = games.filter(g => g.title.toLowerCase().includes(query));
+            renderGames(filtered);
         }
 
-        function spawnDust(x, y, count) {
-            for (let i = 0; i < count; i++) {
-                particles.push({
-                    x: x + (Math.random() - 0.5) * 40,
-                    y: y,
-                    vx: (Math.random() - 0.5) * 4,
-                    vy: -Math.random() * 3,
-                    size: 6,
-                    color: '#a4b0be',
-                    life: 18
-                });
-            }
-        }
-
-        // Fizik Çarpışmaları (Araba-Araba, Araba-Top, Araba-Kasa)
-        function handlePhysics() {
-            // 1. İki Arabanın Birbirine Çarpması
-            const dx = car2.x - car1.x;
-            const dy = car2.y - car1.y;
-            const minDistX = 88;
-            const minDistY = 38;
-
-            if (Math.abs(dx) < minDistX && Math.abs(dy) < minDistY) {
-                const overlapX = minDistX - Math.abs(dx);
-                const dir = dx >= 0 ? 1 : -1;
-
-                car1.x -= dir * (overlapX / 2);
-                car2.x += dir * (overlapX / 2);
-
-                // Momentum aktarımı ve sekme
-                const v1 = car1.vx;
-                const v2 = car2.vx;
-                const restitution = 0.85;
-
-                car1.vx = (v1 * (car1.mass - car2.mass) + 2 * car2.mass * v2) / (car1.mass + car2.mass) * restitution;
-                car2.vx = (v2 * (car2.mass - car1.mass) + 2 * car1.mass * v1) / (car1.mass + car2.mass) * restitution;
-
-                // Çarpışma şiddetliyse hafif yukarı zıplat ve kıvılcım çıkar
-                if (Math.abs(v1 - v2) > 4) {
-                    car1.vy = -3.5;
-                    car2.vy = -3.5;
-                    const midX = (car1.x + car2.x) / 2;
-                    const midY = (car1.y + car2.y) / 2;
-                    for (let i = 0; i < 12; i++) {
-                        particles.push({
-                            x: midX, y: midY,
-                            vx: (Math.random() - 0.5) * 9,
-                            vy: -Math.random() * 7,
-                            size: 5, color: '#feca57', life: 16
-                        });
-                    }
-                }
-            }
-
-            // 2. Dev Topların Fiziği
-            balls.forEach(b => {
-                b.vy += GRAVITY * 0.7;
-                b.x += b.vx;
-                b.y += b.vy;
-
-                const gh = getTerrainHeight(b.x);
-                if (b.y + b.radius >= gh) {
-                    b.y = gh - b.radius;
-                    b.vy *= -0.72; // Sekme
-                    b.vx *= 0.98;
-                }
-                if (b.x < 50 || b.x > WORLD_W - 50) b.vx *= -0.8;
-
-                // Arabalar veya oyuncular topa vurursa
-                [...cars, p1, p2].forEach(ent => {
-                    if (ent.inCar) return;
-                    const bdx = b.x - ent.x;
-                    const bdy = b.y - ent.y;
-                    const dist = Math.hypot(bdx, bdy);
-                    const minD = b.radius + 32;
-                    if (dist < minD && dist > 0) {
-                        const nx = bdx / dist;
-                        const ny = bdy / dist;
-                        b.x += nx * (minD - dist);
-                        b.y += ny * (minD - dist);
-                        b.vx += ent.vx * 1.4 + nx * 4;
-                        b.vy = -Math.abs(ent.vx) * 0.8 - 5;
-                    }
-                });
-            });
-
-            // 3. Tahta Kasalar Fiziği
-            crates.forEach(c => {
-                c.vy += GRAVITY;
-                c.x += c.vx;
-                c.y += c.vy;
-                const gh = getTerrainHeight(c.x);
-                if (c.y + c.size / 2 >= gh) {
-                    c.y = gh - c.size / 2;
-                    c.vy = 0;
-                    c.vx *= 0.85;
-                }
-
-                [...cars, p1, p2].forEach(ent => {
-                    if (ent.inCar) return;
-                    if (Math.abs(c.x - ent.x) < 42 && Math.abs(c.y - ent.y) < 32) {
-                        const dir = c.x >= ent.x ? 1 : -1;
-                        c.x += dir * 8;
-                        c.vx = ent.vx * 1.3 + dir * 3;
-                        c.vy = -3;
-                    }
-                });
-            });
-        }
-
-        function resetGame() {
-            p1.reset();
-            p2.reset();
-            car1.reset();
-            car2.reset();
-            particles = [];
-            initWorld();
-        }
-
-        // Dünyayı Çiz (Her iki Split-Screen Kamera için)
-        function drawWorld(ctx, camX, camY, viewW, viewH) {
-            ctx.save();
-            
-            // Kamera Sınırlandırması
-            const clampedCamX = Math.max(viewW / 2, Math.min(WORLD_W - viewW / 2, camX));
-            const clampedCamY = Math.min(GROUND_Y + 130 - viewH / 2, camY - 60);
-
-            ctx.translate(-clampedCamX + viewW / 2, -clampedCamY + viewH / 2);
-
-            // 1. Gökyüzü Arka Planı
-            ctx.fillStyle = '#70a1ff';
-            ctx.fillRect(clampedCamX - viewW / 2, clampedCamY - viewH / 2, viewW, viewH);
-
-            // Piksel Bulutlar
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
-            clouds.forEach(cl => {
-                ctx.fillRect(cl.x, cl.y, cl.w, 24);
-                ctx.fillRect(cl.x + 15, cl.y - 12, cl.w - 30, 14);
-            });
-
-            // Uzaktaki Tepeler (Paralaks Efekti)
-            ctx.fillStyle = '#2ed573';
-            for (let hx = 0; hx < WORLD_W; hx += 600) {
-                ctx.beginPath();
-                ctx.arc(hx + 300, GROUND_Y, 320, Math.PI, 0);
-                ctx.fill();
-            }
-
-            // 2. Arka Plan Ağaçları
-            trees.forEach(t => {
-                // Gövde
-                ctx.fillStyle = '#843b1a';
-                ctx.fillRect(t.x - 8, GROUND_Y - t.h, 16, t.h);
-                // Yapraklar (Piksel bloklar)
-                ctx.fillStyle = '#009432';
-                ctx.fillRect(t.x - 36, GROUND_Y - t.h - 40, 72, 50);
-                ctx.fillStyle = '#A3CB38';
-                ctx.fillRect(t.x - 24, GROUND_Y - t.h - 65, 48, 30);
-            });
-
-            // 3. Başlangıç Garajı (Arka Plan ve Çatı)
-            ctx.fillStyle = '#2f3542';
-            ctx.fillRect(GARAGE.x, GARAGE.y, GARAGE.w, GARAGE.h);
-            // Garaj İç Duvar Tuğla Detayı
-            ctx.fillStyle = '#57606f';
-            ctx.fillRect(GARAGE.x + 12, GARAGE.y + 16, GARAGE.w - 24, GARAGE.h - 16);
-            // Garaj Çatısı
-            ctx.fillStyle = '#ff4757';
-            ctx.fillRect(GARAGE.x - 15, GARAGE.y - 18, GARAGE.w + 30, 22);
-            // Garaj Tabelası
-            ctx.fillStyle = '#1e272e';
-            ctx.fillRect(GARAGE.x + 140, GARAGE.y - 42, 180, 24);
-            ctx.fillStyle = '#feca57';
-            ctx.font = 'bold 14px Courier New';
-            ctx.textAlign = 'center';
-            ctx.fillText('OYUNCU GARAJI', GARAGE.x + 230, GARAGE.y - 25);
-
-            // 4. Zıplama Rampaları
-            ramps.forEach(r => {
-                ctx.fillStyle = '#ff9f43';
-                ctx.beginPath();
-                if (r.dir === 'RIGHT') {
-                    ctx.moveTo(r.x, GROUND_Y);
-                    ctx.lineTo(r.x + r.w, GROUND_Y - r.h);
-                    ctx.lineTo(r.x + r.w, GROUND_Y);
-                } else {
-                    ctx.moveTo(r.x, GROUND_Y - r.h);
-                    ctx.lineTo(r.x + r.w, GROUND_Y);
-                    ctx.lineTo(r.x, GROUND_Y);
-                }
-                ctx.closePath();
-                ctx.fill();
-                ctx.strokeStyle = '#ee5253';
-                ctx.lineWidth = 3;
-                ctx.stroke();
-            });
-
-            // 5. Bahçe Zemini (Çimen ve Toprak Katmanı)
-            ctx.fillStyle = '#26de81';
-            ctx.fillRect(0, GROUND_Y, WORLD_W, 24);
-            ctx.fillStyle = '#843b1a';
-            ctx.fillRect(0, GROUND_Y + 24, WORLD_W, 300);
-
-            // Piksel Toprak Taşları
-            ctx.fillStyle = '#6c2e12';
-            for (let gx = 40; gx < WORLD_W; gx += 140) {
-                ctx.fillRect(gx, GROUND_Y + 45, 22, 12);
-                ctx.fillRect(gx + 65, GROUND_Y + 75, 30, 14);
-            }
-
-            // Bahçe Sınır Çitleri (Sol ve Sağ)
-            ctx.fillStyle = '#cd6133';
-            ctx.fillRect(0, GROUND_Y - 120, 25, 120);
-            ctx.fillRect(WORLD_W - 25, GROUND_Y - 120, 25, 120);
-
-            // 6. Tahta Kasalar
-            crates.forEach(c => {
-                ctx.fillStyle = '#cd6133';
-                ctx.fillRect(c.x - c.size / 2, c.y - c.size / 2, c.size, c.size);
-                ctx.strokeStyle = '#000';
-                ctx.lineWidth = 2;
-                ctx.strokeRect(c.x - c.size / 2, c.y - c.size / 2, c.size, c.size);
-                ctx.beginPath();
-                ctx.moveTo(c.x - c.size / 2, c.y - c.size / 2);
-                ctx.lineTo(c.x + c.size / 2, c.y + c.size / 2);
-                ctx.stroke();
-            });
-
-            // 7. Dev Fizik Topları
-            balls.forEach(b => {
-                ctx.fillStyle = b.color;
-                ctx.beginPath();
-                ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.strokeStyle = '#000';
-                ctx.lineWidth = 3;
-                ctx.stroke();
-            });
-
-            // 8. Arabalar ve Oyuncular
-            car1.draw(ctx);
-            car2.draw(ctx);
-            p1.draw(ctx);
-            p2.draw(ctx);
-
-            // 9. Parçacıklar
-            particles.forEach(p => {
-                ctx.fillStyle = p.color;
-                ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
-            });
-
-            ctx.restore();
-        }
-
-        // Ana Oyun Döngüsü
-        function gameLoop() {
-            // Bulutları hareket ettir
-            clouds.forEach(cl => {
-                cl.x += cl.speed;
-                if (cl.x > WORLD_W) cl.x = -150;
-            });
-
-            // Güncellemeler
-            p1.update();
-            p2.update();
-            car1.update();
-            car2.update();
-            handlePhysics();
-
-            // Parçacıkları güncelle
-            for (let i = particles.length - 1; i >= 0; i--) {
-                let p = particles[i];
-                p.x += p.vx;
-                p.y += p.vy;
-                p.life--;
-                if (p.life <= 0) particles.splice(i, 1);
-            }
-
-            const halfW = canvas.width / 2;
-            const fullH = canvas.height;
-
-            // --- SOL KAMERA: 1. OYUNCUYU TAKİP EDER (İnsan veya Araba) ---
-            const target1 = p1.inCar ? p1.inCar : p1;
-            ctx.save();
-            ctx.beginPath();
-            ctx.rect(0, 0, halfW, fullH);
-            ctx.clip();
-            drawWorld(ctx, target1.x, target1.y, halfW, fullH);
-            ctx.restore();
-
-            // --- SAĞ KAMERA: 2. OYUNCUYU TAKİP EDER (İnsan veya Araba) ---
-            const target2 = p2.inCar ? p2.inCar : p2;
-            ctx.save();
-            ctx.beginPath();
-            ctx.rect(halfW, 0, halfW, fullH);
-            ctx.clip();
-            drawWorld(ctx, target2.x, target2.y, halfW, fullH);
-            ctx.restore();
-
-            // Ekran Ayırıcı Orta Çizgi
-            ctx.fillStyle = '#1e272e';
-            ctx.fillRect(halfW - 3, 0, 6, fullH);
-
-            requestAnimationFrame(gameLoop);
-        }
-
-        initWorld();
-        gameLoop();
+        // Sayfa açıldığında oyunları listele
+        renderGames(games);
     </script>
 </body>
 </html>
