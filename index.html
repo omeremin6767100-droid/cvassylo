@@ -3,257 +3,776 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>r/place - Live Peer Pixel War</title>
-    <!-- Ücretsiz ve Doğrudan Bağlantı Sağlayan PeerJS Kütüphanesi -->
-    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <title>2D Pixel Co-Op Car Sandbox</title>
     <style>
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            user-select: none;
+            font-family: 'Courier New', Courier, monospace;
         }
         body {
-            background-color: #121212;
-            color: #fff;
+            background-color: #111;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
             display: flex;
             flex-direction: column;
+        }
+        #ui-bar {
+            height: 40px;
+            background: #1a1a1a;
+            border-bottom: 3px solid #333;
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            overflow: hidden;
-        }
-        header {
-            margin-bottom: 15px;
-            text-align: center;
-        }
-        h1 {
-            font-size: 1.8rem;
-            color: #ff4500;
-            margin-bottom: 5px;
-        }
-        #cooldown-text {
-            font-size: 1rem;
-            color: #00ffcc;
+            padding: 0 20px;
+            font-size: 14px;
             font-weight: bold;
+            z-index: 10;
         }
-        #status-text {
-            font-size: 0.85rem;
-            color: #ffaa00;
-            margin-top: 5px;
+        .p1-badge { color: #ff4757; }
+        .p2-badge { color: #1e90ff; }
+        .reset-btn {
+            background: #2ed573;
+            color: #000;
+            border: none;
+            padding: 5px 12px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 4px;
+            font-family: inherit;
         }
-        #canvas-container {
-            position: relative;
-            border: 4px solid #333;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-            background-color: #ffffff;
-            cursor: crosshair;
-            width: 500px;
-            height: 500px;
-            max-width: 90vw;
-            max-height: 50vh;
-        }
+        .reset-btn:hover { background: #7bed9f; }
         canvas {
             display: block;
+            width: 100%;
+            height: calc(100vh - 40px);
             image-rendering: pixelated;
             image-rendering: crisp-edges;
-            width: 100%;
-            height: 100%;
-        }
-        .palette {
-            display: flex;
-            gap: 8px;
-            margin-top: 20px;
-            background: #1e1e1e;
-            padding: 10px 20px;
-            border-radius: 30px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            flex-wrap: wrap;
-            justify-content: center;
-            max-width: 90vw;
-        }
-        .color-btn {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            border: 2px solid transparent;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .color-btn:hover {
-            transform: scale(1.15);
-        }
-        .color-btn.active {
-            border-color: #fff;
-            transform: scale(1.2);
-            box-shadow: 0 0 10px rgba(255,255,255,0.6);
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>r/place Canlı Ortak Tuval</h1>
-        <div id="cooldown-text">Piksel yerleştirmeye hazırsın!</div>
-        <div id="status-text">Oda kuruluyor...</div>
-    </header>
-
-    <div id="canvas-container">
-        <canvas id="pixelCanvas" width="50" height="50"></canvas>
+    <div id="ui-bar">
+        <div class="p1-badge">OYUNCU 1: W-A-S-D | Turbo: SPACE</div>
+        <button class="reset-btn" onclick="resetGame()">GARAJA DÖN (R)</button>
+        <div class="p2-badge">OYUNCU 2: OK TUŞLARI | Turbo: ENTER</div>
     </div>
 
-    <div class="palette" id="palette"></div>
+    <canvas id="gameCanvas"></canvas>
 
     <script>
-        const canvas = document.getElementById('pixelCanvas');
+        const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        const GRID_SIZE = 50; 
-        
-        const colors = [
-            '#000000', '#ffffff', '#e40303', '#ff8c00', '#ffed00', '#008026', 
-            '#004dff', '#750787', '#ffafaf', '#24ff00', '#00ffff', '#808080'
-        ];
 
-        let selectedColor = colors[0];
-        let gridData = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill('#ffffff'));
-        
-        // P2P Canlı Bağlantı Kurulumu
-        const ROOM_ID = "cvassylo-rplace-room-1"; // Ortak Oda Adı
-        const peer = new Peer();
-        let connections = [];
-
-        peer.on('open', (id) => {
-            document.getElementById('status-text').innerText = "● Canlı Ağ Aktif (Diğer oyuncular bekleniyor)";
-            document.getElementById('status-text').style.color = "#00ffcc";
-            
-            // Odaya bağlanmayı dene
-            const conn = peer.connect(ROOM_ID);
-            setupConnection(conn);
-        });
-
-        peer.on('connection', (conn) => {
-            setupConnection(conn);
-        });
-
-        function setupConnection(conn) {
-            conn.on('open', () => {
-                connections.push(conn);
-                document.getElementById('status-text').innerText = "● Oyuncu Bağlandı! Canlı Senkronize";
-                document.getElementById('status-text').style.color = "#00ff00";
-
-                // Mevcut tuval durumunu yeni gelen oyuncuya gönder
-                conn.send({ type: 'INIT', grid: gridData });
-            });
-
-            conn.on('data', (data) => {
-                if (data.type === 'PIXEL') {
-                    gridData[data.y][data.x] = data.color;
-                    drawCanvas();
-                } else if (data.type === 'INIT') {
-                    gridData = data.grid;
-                    drawCanvas();
-                }
-            });
+        // Ekran boyutunu ayarla
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight - 40;
         }
+        window.addEventListener('resize', resize);
+        resize();
 
-        function broadcastPixel(x, y, color) {
-            connections.forEach(conn => {
-                if (conn.open) {
-                    conn.send({ type: 'PIXEL', x: x, y: y, color: color });
-                }
-            });
-        }
+        // DEVASA BAHÇE DÜNYASI BOYUTLARI
+        const WORLD_W = 3600;
+        const WORLD_H = 3600;
 
-        // Palet Oluşturma
-        const paletteContainer = document.getElementById('palette');
-        colors.forEach((color, index) => {
-            const btn = document.createElement('div');
-            btn.className = `color-btn ${index === 0 ? 'active' : ''}`;
-            btn.style.backgroundColor = color;
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                selectedColor = color;
-            });
-            paletteContainer.appendChild(btn);
+        // Klavye Kontrolleri
+        const keys = {};
+        window.addEventListener('keydown', e => {
+            keys[e.code] = true;
+            if (e.code === 'KeyR') resetGame();
         });
+        window.addEventListener('keyup', e => keys[e.code] = false);
 
-        // Tuval Çizimi ve Sıfırlama
-        function drawCanvas() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            let filledCount = 0;
+        // Parçacık (Duman / Kıvılcım / Teker İzi) Havuzu
+        let particles = [];
+        let skidMarks = [];
 
-            for (let y = 0; y < GRID_SIZE; y++) {
-                for (let x = 0; x < GRID_SIZE; x++) {
-                    ctx.fillStyle = gridData[y][x];
-                    ctx.fillRect(x, y, 1, 1);
-                    if (gridData[y][x] !== '#ffffff') {
-                        filledCount++;
+        // Harita Objeleri
+        let ramps = [];
+        let crates = [];
+        let balls = [];
+        let trees = [];
+        let puddles = [];
+
+        // Garaj Konumu
+        const GARAGE = { x: 1650, y: 1650, w: 300, h: 240 };
+
+        // Araç Sınıfı (Fizik ve Piksel Çizim)
+        class Car {
+            constructor(x, y, color, stripeColor, controls, mass, maxSpeed) {
+                this.startX = x;
+                this.startY = y;
+                this.color = color;
+                this.stripeColor = stripeColor;
+                this.controls = controls;
+                this.mass = mass;
+                this.maxSpeed = maxSpeed;
+                this.reset();
+            }
+
+            reset() {
+                this.x = this.startX;
+                this.y = this.startY;
+                this.vx = 0;
+                this.vy = 0;
+                this.angle = -Math.PI / 2; // Yukarı bakarak başla
+                this.angularVelocity = 0;
+                this.z = 0;   // Yükseklik (Rampadan uçuş için)
+                this.vz = 0;  // Dikey hız
+                this.width = 28;
+                this.height = 48;
+                this.radius = 22;
+                this.nitro = 100;
+            }
+
+            update() {
+                const isGrounded = this.z <= 0.1;
+
+                // Gaz ve Fren
+                let throttle = 0;
+                if (keys[this.controls.up]) throttle += 1;
+                if (keys[this.controls.down]) throttle -= 0.7;
+
+                // Nitro (Turbo)
+                let usingNitro = false;
+                if (keys[this.controls.nitro] && this.nitro > 0 && throttle > 0) {
+                    usingNitro = true;
+                    this.nitro = Math.max(0, this.nitro - 0.8);
+                } else {
+                    this.nitro = Math.min(100, this.nitro + 0.2);
+                }
+
+                // Direksiyon
+                let steer = 0;
+                if (keys[this.controls.left]) steer -= 1;
+                if (keys[this.controls.right]) steer += 1;
+
+                const forwardX = Math.cos(this.angle);
+                const forwardY = Math.sin(this.angle);
+                const rightX = -forwardY;
+                const rightY = forwardX;
+
+                // Hız bileşenleri
+                let forwardSpeed = this.vx * forwardX + this.vy * forwardY;
+                let lateralSpeed = this.vx * rightX + this.vy * rightY;
+
+                if (isGrounded) {
+                    // Motor gücü
+                    const accel = usingNitro ? 0.55 : 0.32;
+                    forwardSpeed += throttle * accel;
+
+                    // Maksimum hız sınırı
+                    const currentMax = usingNitro ? this.maxSpeed * 1.45 : this.maxSpeed;
+                    if (forwardSpeed > currentMax) forwardSpeed = currentMax;
+                    if (forwardSpeed < -currentMax * 0.5) forwardSpeed = -currentMax * 0.5;
+
+                    // Direksiyon dönüşü (hıza bağlı)
+                    if (Math.abs(forwardSpeed) > 0.3) {
+                        const dir = forwardSpeed >= 0 ? 1 : -1;
+                        this.angle += steer * 0.065 * dir * Math.min(1, Math.abs(forwardSpeed) / 3);
+                    }
+
+                    // Drift / Yanal Sürtünme (Lastik tutuşu)
+                    lateralSpeed *= 0.86;
+                    forwardSpeed *= 0.985;
+
+                    // Teker izi ve duman oluşturma
+                    if (Math.abs(lateralSpeed) > 2.2 || usingNitro) {
+                        if (Math.random() < 0.6) {
+                            skidMarks.push({
+                                x: this.x - forwardX * 15,
+                                y: this.y - forwardY * 15,
+                                alpha: 0.45
+                            });
+                            if (skidMarks.length > 400) skidMarks.shift();
+                        }
+                        particles.push({
+                            x: this.x - forwardX * 22 + (Math.random() - 0.5) * 10,
+                            y: this.y - forwardY * 22 + (Math.random() - 0.5) * 10,
+                            vx: (Math.random() - 0.5) * 1.5,
+                            vy: (Math.random() - 0.5) * 1.5,
+                            size: usingNitro ? 8 : 6,
+                            color: usingNitro ? '#ff9f43' : '#dcdde1',
+                            life: 20
+                        });
+                    }
+                } else {
+                    // Havadayken hafif yön verme
+                    this.angle += steer * 0.025;
+                }
+
+                // Hızları tekrar X ve Y eksenine çevir
+                this.vx = forwardX * forwardSpeed + rightX * lateralSpeed;
+                this.vy = forwardY * forwardSpeed + rightY * lateralSpeed;
+
+                // Pozisyon güncelle
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // Yükseklik / Yerçekimi (Z ekseni)
+                if (this.z > 0 || this.vz > 0) {
+                    this.z += this.vz;
+                    this.vz -= 0.45; // Yerçekimi
+                    if (this.z <= 0) {
+                        this.z = 0;
+                        this.vz = 0;
+                        // Yere çarpma tozu
+                        for (let i = 0; i < 8; i++) {
+                            particles.push({
+                                x: this.x + (Math.random() - 0.5) * 25,
+                                y: this.y + (Math.random() - 0.5) * 25,
+                                vx: (Math.random() - 0.5) * 3,
+                                vy: (Math.random() - 0.5) * 3,
+                                size: 7,
+                                color: '#a4b0be',
+                                life: 18
+                            });
+                        }
+                    }
+                }
+
+                // Rampa Kontrolü (Zıplama!)
+                if (isGrounded) {
+                    for (let r of ramps) {
+                        if (this.x > r.x && this.x < r.x + r.w && this.y > r.y && this.y < r.y + r.h) {
+                            const speed = Math.hypot(this.vx, this.vy);
+                            if (speed > 4) {
+                                this.vz = Math.min(13, speed * 1.15);
+                                this.z = 1;
+                            }
+                        }
+                    }
+                }
+
+                // Bahçe Sınırları (Çitlerden sekme)
+                const margin = 60;
+                if (this.x < margin) { this.x = margin; this.vx *= -0.6; }
+                if (this.x > WORLD_W - margin) { this.x = WORLD_W - margin; this.vx *= -0.6; }
+                if (this.y < margin) { this.y = margin; this.vy *= -0.6; }
+                if (this.y > WORLD_H - margin) { this.y = WORLD_H - margin; this.vy *= -0.6; }
+
+                // Garaj Duvarları Çarpışması (Sadece üst, sol ve sağ duvar kapalı, alt taraf açık kapı)
+                if (this.z < 15) {
+                    // Sol Duvar
+                    if (this.x - this.radius < GARAGE.x + 15 && this.x > GARAGE.x - 10 && this.y > GARAGE.y && this.y < GARAGE.y + GARAGE.h) {
+                        this.x = GARAGE.x + 15 + this.radius;
+                        this.vx *= -0.5;
+                    }
+                    // Sağ Duvar
+                    if (this.x + this.radius > GARAGE.x + GARAGE.w - 15 && this.x < GARAGE.x + GARAGE.w + 10 && this.y > GARAGE.y && this.y < GARAGE.y + GARAGE.h) {
+                        this.x = GARAGE.x + GARAGE.w - 15 - this.radius;
+                        this.vx *= -0.5;
+                    }
+                    // Üst Duvar
+                    if (this.y - this.radius < GARAGE.y + 15 && this.y > GARAGE.y - 10 && this.x > GARAGE.x && this.x < GARAGE.x + GARAGE.w) {
+                        this.y = GARAGE.y + 15 + this.radius;
+                        this.vy *= -0.5;
                     }
                 }
             }
 
-            if (filledCount >= (GRID_SIZE * GRID_SIZE)) {
-                setTimeout(() => {
-                    alert("Tuval tamamen doldu! Sıfırlanıyor...");
-                    gridData = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill('#ffffff'));
-                    drawCanvas();
-                }, 100);
+            draw(ctx) {
+                ctx.save();
+                
+                // Zemin Gölgesi (Havalandıkça uzaklaşır ve küçülür)
+                const shadowOffset = this.z * 0.8;
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+                ctx.beginPath();
+                ctx.ellipse(this.x + shadowOffset, this.y + shadowOffset + 6, 22, 14, this.angle, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Havalandıkça aracın büyüme ölçeği (2.5D derinlik hissi)
+                const scale = 1 + (this.z * 0.015);
+                ctx.translate(this.x, this.y - this.z * 0.6);
+                ctx.rotate(this.angle);
+                ctx.scale(scale, scale);
+
+                // Piksel Tekerlekler
+                ctx.fillStyle = '#1e272e';
+                ctx.fillRect(-18, -17, 10, 5); // Sol arka
+                ctx.fillRect(-18, 12, 10, 5);  // Sağ arka
+                ctx.fillRect(10, -17, 10, 5);  // Sol ön
+                ctx.fillRect(10, 12, 10, 5);   // Sağ ön
+
+                // Ana Gövde (Piksel Bloklar)
+                ctx.fillStyle = this.color;
+                ctx.fillRect(-22, -13, 44, 26);
+
+                // Gövde Gölge/Kenarlık
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(-22, -13, 44, 26);
+
+                // Yarış Şeridi
+                ctx.fillStyle = this.stripeColor;
+                ctx.fillRect(-20, -4, 40, 8);
+
+                // Ön Cam ve Arka Cam (Piksel tarzı)
+                ctx.fillStyle = '#48dbfb';
+                ctx.fillRect(4, -10, 9, 20);  // Ön cam
+                ctx.fillRect(-16, -9, 6, 18); // Arka cam
+
+                // Farlar
+                ctx.fillStyle = '#feca57';
+                ctx.fillRect(20, -10, 3, 5);
+                ctx.fillRect(20, 5, 3, 5);
+
+                // Fren Lambaları
+                ctx.fillStyle = '#ff3f34';
+                ctx.fillRect(-23, -10, 2, 5);
+                ctx.fillRect(-23, 5, 2, 5);
+
+                ctx.restore();
+
+                // Nitro Barı (Aracın hemen altında küçük piksel bar)
+                if (this.nitro < 100) {
+                    ctx.fillStyle = 'rgba(0,0,0,0.6)';
+                    ctx.fillRect(this.x - 16, this.y + 24, 32, 5);
+                    ctx.fillStyle = '#ff9f43';
+                    ctx.fillRect(this.x - 15, this.y + 25, 30 * (this.nitro / 100), 3);
+                }
             }
         }
 
-        // Piksel Koyma ve 5 Dakika Cooldown
-        canvas.addEventListener('click', (e) => {
-            const now = Date.now();
-            const storedCooldown = parseInt(localStorage.getItem('r_place_cooldown')) || 0;
+        // İki Aracı Oluştur (Garajın içinde yan yana)
+        const car1 = new Car(
+            GARAGE.x + 90, GARAGE.y + 130,
+            '#ff4757', '#ffffff',
+            { up: 'KeyW', down: 'KeyS', left: 'KeyA', right: 'KeyD', nitro: 'Space' },
+            1.0, 9.5
+        );
 
-            if (now < storedCooldown) {
-                const remainingSeconds = Math.ceil((storedCooldown - now) / 1000);
-                const mins = Math.floor(remainingSeconds / 60);
-                const secs = remainingSeconds % 60;
-                alert(`Bekleme süresindesin! Kalan süre: ${mins}dk ${secs}sn`);
-                return;
+        const car2 = new Car(
+            GARAGE.x + 210, GARAGE.y + 130,
+            '#1e90ff', '#feca57',
+            { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight', nitro: 'Enter' },
+            1.15, 9.2
+        );
+
+        // Bahçe Objelerini Oluştur
+        function initWorld() {
+            ramps = [];
+            crates = [];
+            balls = [];
+            trees = [];
+            puddles = [];
+
+            // Zıplama Rampaları (Bahçenin çeşitli yerlerinde)
+            const rampCoords = [
+                { x: 1680, y: 1200, w: 140, h: 90, dir: 'UP' },
+                { x: 1100, y: 1700, w: 90, h: 140, dir: 'LEFT' },
+                { x: 2300, y: 1700, w: 90, h: 140, dir: 'RIGHT' },
+                { x: 1700, y: 2300, w: 140, h: 90, dir: 'DOWN' },
+                { x: 800,  y: 800,  w: 140, h: 90, dir: 'UP' },
+                { x: 2700, y: 2700, w: 140, h: 90, dir: 'UP' },
+                { x: 2600, y: 900,  w: 90, h: 140, dir: 'LEFT' },
+                { x: 900,  y: 2600, w: 90, h: 140, dir: 'RIGHT' }
+            ];
+            ramps = rampCoords;
+
+            // Dev Fizik Futbol/Plaj Topları (Çarpıp uçurmak için)
+            balls.push({ x: 1800, y: 1450, vx: 0, vy: 0, radius: 28, color: '#ff9ff3' });
+            balls.push({ x: 1300, y: 1300, vx: 0, vy: 0, radius: 34, color: '#feca57' });
+            balls.push({ x: 2300, y: 2200, vx: 0, vy: 0, radius: 34, color: '#48dbfb' });
+
+            // Kırılabilir / İtilebilir Tahta Kasalar
+            for (let i = 0; i < 45; i++) {
+                let cx = 200 + Math.random() * (WORLD_W - 400);
+                let cy = 200 + Math.random() * (WORLD_H - 400);
+                // Garajın içine doğmasın
+                if (Math.hypot(cx - 1800, cy - 1770) > 350) {
+                    crates.push({ x: cx, y: cy, vx: 0, vy: 0, size: 28 });
+                }
             }
 
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
+            // Dekoratif Çam/Meşe Piksel Ağaçları (Bahçe kenarlarında ve koruluklarda)
+            for (let i = 0; i < 65; i++) {
+                let tx = 120 + Math.random() * (WORLD_W - 240);
+                let ty = 120 + Math.random() * (WORLD_H - 240);
+                if (Math.hypot(tx - 1800, ty - 1770) > 450) {
+                    trees.push({ x: tx, y: ty, radius: 24 });
+                }
+            }
+
+            // Çamur / Su Birikintileri
+            for (let i = 0; i < 12; i++) {
+                let px = 300 + Math.random() * (WORLD_W - 600);
+                let py = 300 + Math.random() * (WORLD_H - 600);
+                if (Math.hypot(px - 1800, py - 1770) > 400) {
+                    puddles.push({ x: px, y: py, radius: 65 + Math.random() * 40 });
+                }
+            }
+        }
+
+        function resetGame() {
+            car1.reset();
+            car2.reset();
+            skidMarks = [];
+            particles = [];
+            initWorld();
+        }
+
+        // Fizik Çarpışma Hesaplamaları
+        function handleCollisions() {
+            // 1. İki Arabanın Birbirine Çarpması (Elastik Fizik ve Kıvılcım)
+            if (Math.abs(car1.z - car2.z) < 15) {
+                const dx = car2.x - car1.x;
+                const dy = car2.y - car1.y;
+                const dist = Math.hypot(dx, dy);
+                const minDist = car1.radius + car2.radius;
+
+                if (dist < minDist && dist > 0) {
+                    const nx = dx / dist;
+                    const ny = dy / dist;
+
+                    // İç içe geçmeyi ayır
+                    const overlap = (minDist - dist) / 2;
+                    car1.x -= nx * overlap;
+                    car1.y -= ny * overlap;
+                    car2.x += nx * overlap;
+                    car2.y += ny * overlap;
+
+                    // Göreceli hız ve momentum aktarımı
+                    const rvx = car2.vx - car1.vx;
+                    const rvy = car2.vy - car1.vy;
+                    const velAlongNormal = rvx * nx + rvy * ny;
+
+                    if (velAlongNormal < 0) {
+                        const restitution = 0.85; // Sekme katsayısı
+                        let impulse = -(1 + restitution) * velAlongNormal;
+                        impulse /= (1 / car1.mass + 1 / car2.mass);
+
+                        const impulseX = impulse * nx;
+                        const impulseY = impulse * ny;
+
+                        car1.vx -= (1 / car1.mass) * impulseX;
+                        car1.vy -= (1 / car1.mass) * impulseY;
+                        car2.vx += (1 / car2.mass) * impulseX;
+                        car2.vy += (1 / car2.mass) * impulseY;
+
+                        // Çarpışma kıvılcımları
+                        const midX = (car1.x + car2.x) / 2;
+                        const midY = (car1.y + car2.y) / 2;
+                        for (let i = 0; i < 12; i++) {
+                            particles.push({
+                                x: midX,
+                                y: midY,
+                                vx: (Math.random() - 0.5) * 8,
+                                vy: (Math.random() - 0.5) * 8,
+                                size: 5,
+                                color: '#feca57',
+                                life: 15
+                            });
+                        }
+                    }
+                }
+            }
+
+            // 2. Arabalar ve Dev Fizik Topları
+            [car1, car2].forEach(car => {
+                if (car.z > 15) return;
+                balls.forEach(ball => {
+                    const dx = ball.x - car.x;
+                    const dy = ball.y - car.y;
+                    const dist = Math.hypot(dx, dy);
+                    if (dist < car.radius + ball.radius && dist > 0) {
+                        const nx = dx / dist;
+                        const ny = dy / dist;
+                        const overlap = (car.radius + ball.radius) - dist;
+                        ball.x += nx * overlap;
+                        ball.y += ny * overlap;
+
+                        const speed = Math.hypot(car.vx, car.vy);
+                        ball.vx += nx * (speed * 1.3 + 2);
+                        ball.vy += ny * (speed * 1.3 + 2);
+                        car.vx *= 0.8;
+                        car.vy *= 0.8;
+                    }
+                });
+
+                // 3. Arabalar ve Tahta Kasalar
+                crates.forEach(crate => {
+                    const dx = crate.x - car.x;
+                    const dy = crate.y - car.y;
+                    const dist = Math.hypot(dx, dy);
+                    if (dist < car.radius + 16 && dist > 0) {
+                        const nx = dx / dist;
+                        const ny = dy / dist;
+                        crate.x += nx * 6;
+                        crate.y += ny * 6;
+                        crate.vx += car.vx * 1.1;
+                        crate.vy += car.vy * 1.1;
+                        car.vx *= 0.9;
+                        car.vy *= 0.9;
+                    }
+                });
+
+                // 4. Ağaç Gövdeleri (Sabit Engel)
+                trees.forEach(tree => {
+                    const dx = car.x - tree.x;
+                    const dy = car.y - tree.y;
+                    const dist = Math.hypot(dx, dy);
+                    if (dist < car.radius + 12 && dist > 0) {
+                        const nx = dx / dist;
+                        const ny = dy / dist;
+                        car.x = tree.x + nx * (car.radius + 12);
+                        car.y = tree.y + ny * (car.radius + 12);
+                        car.vx *= -0.5;
+                        car.vy *= -0.5;
+                    }
+                });
+            });
+
+            // Topların ve Kasaların Hareketi ve Sürtünmesi
+            balls.forEach(b => {
+                b.x += b.vx;
+                b.y += b.vy;
+                b.vx *= 0.97;
+                b.vy *= 0.97;
+                if (b.x < 80 || b.x > WORLD_W - 80) b.vx *= -0.8;
+                if (b.y < 80 || b.y > WORLD_H - 80) b.vy *= -0.8;
+            });
+
+            crates.forEach(c => {
+                c.x += c.vx;
+                c.y += c.vy;
+                c.vx *= 0.88;
+                c.vy *= 0.88;
+            });
+        }
+
+        // Dünyayı Çiz (Her iki kamera için ortak render fonksiyonu)
+        function drawWorld(ctx, camX, camY, viewW, viewH) {
+            ctx.save();
+            ctx.translate(-camX + viewW / 2, -camY + viewH / 2);
+
+            // 1. Bahçe Çimeni Zemini
+            ctx.fillStyle = '#2ed573';
+            ctx.fillRect(0, 0, WORLD_W, WORLD_H);
+
+            // Piksel Çim Dokusu (Grid ve küçük çim öbekleri)
+            ctx.fillStyle = '#26de81';
+            const tileSize = 80;
+            const startCol = Math.max(0, Math.floor((camX - viewW / 2) / tileSize));
+            const endCol = Math.min(WORLD_W / tileSize, Math.ceil((camX + viewW / 2) / tileSize));
+            const startRow = Math.max(0, Math.floor((camY - viewH / 2) / tileSize));
+            const endRow = Math.min(WORLD_H / tileSize, Math.ceil((camY + viewH / 2) / tileSize));
+
+            for (let r = startRow; r < endRow; r++) {
+                for (let c = startCol; c < endCol; c++) {
+                    if ((r + c) % 2 === 0) {
+                        ctx.fillRect(c * tileSize, r * tileSize, tileSize, tileSize);
+                    }
+                }
+            }
+
+            // 2. Bahçe Çitleri (Sınır Duvarı)
+            ctx.strokeStyle = '#833471';
+            ctx.lineWidth = 40;
+            ctx.strokeRect(20, 20, WORLD_W - 40, WORLD_H - 40);
+
+            // 3. Su / Çamur Birikintileri
+            puddles.forEach(p => {
+                ctx.fillStyle = '#38ada9';
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#079992';
+                ctx.lineWidth = 4;
+                ctx.stroke();
+            });
+
+            // 4. Başlangıç Garajı Zemini ve Duvarları
+            ctx.fillStyle = '#57606f'; // Asfalt/Beton zemin
+            ctx.fillRect(GARAGE.x, GARAGE.y, GARAGE.w, GARAGE.h);
+
+            // Garaj Sarı-Siyah Güvenlik Şeritleri
+            ctx.fillStyle = '#feca57';
+            ctx.fillRect(GARAGE.x + 15, GARAGE.y + GARAGE.h - 15, GARAGE.w - 30, 15);
             
-            const clickX = Math.floor((e.clientX - rect.left) * scaleX);
-            const clickY = Math.floor((e.clientY - rect.top) * scaleY);
+            // Garaj Park Çizgileri
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 3;
+            ctx.setLineDash([10, 10]);
+            ctx.strokeRect(GARAGE.x + 45, GARAGE.y + 50, 90, 140);
+            ctx.strokeRect(GARAGE.x + 165, GARAGE.y + 50, 90, 140);
+            ctx.setLineDash([]);
 
-            if (clickX >= 0 && clickX < GRID_SIZE && clickY >= 0 && clickY < GRID_SIZE) {
-                gridData[clickY][clickX] = selectedColor;
-                drawCanvas();
+            // Garaj Duvarları (Üst, Sol, Sağ)
+            ctx.fillStyle = '#2f3542';
+            ctx.fillRect(GARAGE.x, GARAGE.y, GARAGE.w, 16); // Üst duvar
+            ctx.fillRect(GARAGE.x, GARAGE.y, 16, GARAGE.h); // Sol duvar
+            ctx.fillRect(GARAGE.x + GARAGE.w - 16, GARAGE.y, 16, GARAGE.h); // Sağ duvar
 
-                // Canlı olarak bağlanan diğer kişilere gönder
-                broadcastPixel(clickX, clickY, selectedColor);
+            // Garaj Tabelası
+            ctx.fillStyle = '#ff4757';
+            ctx.fillRect(GARAGE.x + 80, GARAGE.y - 12, 140, 24);
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 14px Courier New';
+            ctx.textAlign = 'center';
+            ctx.fillText('ANA GARAJ', GARAGE.x + 150, GARAGE.y + 5);
 
-                // 5 Dakika (300.000 ms) Cooldown
-                const newCooldown = now + (5 * 60 * 1000);
-                localStorage.setItem('r_place_cooldown', newCooldown);
+            // 5. Zıplama Rampaları
+            ramps.forEach(r => {
+                ctx.fillStyle = '#ff9f43';
+                ctx.fillRect(r.x, r.y, r.w, r.h);
+                ctx.strokeStyle = '#ee5253';
+                ctx.lineWidth = 4;
+                ctx.strokeRect(r.x, r.y, r.w, r.h);
+
+                // Rampa Yön Okları (Piksel Çizgiler)
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 24px Courier New';
+                ctx.textAlign = 'center';
+                ctx.fillText('▲▲▲', r.x + r.w / 2, r.y + r.h / 2 + 8);
+            });
+
+            // 6. Tekerlek İzleri
+            skidMarks.forEach(s => {
+                ctx.fillStyle = `rgba(30, 39, 46, ${s.alpha})`;
+                ctx.fillRect(s.x - 3, s.y - 3, 6, 6);
+            });
+
+            // 7. Tahta Kasalar
+            crates.forEach(c => {
+                ctx.fillStyle = '#cd6133';
+                ctx.fillRect(c.x - 14, c.y - 14, 28, 28);
+                ctx.strokeStyle = '#843b1a';
+                ctx.lineWidth = 3;
+                ctx.strokeRect(c.x - 14, c.y - 14, 28, 28);
+                // Çapraz tahta çıta
+                ctx.beginPath();
+                ctx.moveTo(c.x - 14, c.y - 14);
+                ctx.lineTo(c.x + 14, c.y + 14);
+                ctx.stroke();
+            });
+
+            // 8. Dev Fizik Topları
+            balls.forEach(b => {
+                ctx.fillStyle = b.color;
+                ctx.beginPath();
+                ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+                // Top deseni
+                ctx.fillStyle = 'rgba(255,255,255,0.4)';
+                ctx.beginPath();
+                ctx.arc(b.x - 8, b.y - 8, b.radius * 0.3, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // 9. Araçlar (Yere yakın olan önce çizilir)
+            const sortedCars = [car1, car2].sort((a, b) => a.z - b.z);
+            sortedCars.forEach(car => car.draw(ctx));
+
+            // 10. Piksel Ağaçlar (Üstten Görünüm - Araçlar altından geçebilir)
+            trees.forEach(t => {
+                // Ağaç gölgesi
+                ctx.fillStyle = 'rgba(0,0,0,0.25)';
+                ctx.beginPath();
+                ctx.arc(t.x + 8, t.y + 8, t.radius, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Ağaç yaprakları (Piksel katmanlar)
+                ctx.fillStyle = '#009432';
+                ctx.beginPath();
+                ctx.arc(t.x, t.y, t.radius, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = '#A3CB38';
+                ctx.beginPath();
+                ctx.arc(t.x - 5, t.y - 5, t.radius * 0.6, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // 11. Duman ve Kıvılcım Parçacıkları
+            particles.forEach(p => {
+                ctx.fillStyle = p.color;
+                ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
+            });
+
+            // 12. Diğer Oyuncuyu Gösteren Yön Oku (Eğer ekrandan uzaklaşırsa kaybolmamak için)
+            const otherCar = (camX === car1.x && camY === car1.y) ? car2 : car1;
+            const dx = otherCar.x - camX;
+            const dy = otherCar.y - camY;
+            if (Math.abs(dx) > viewW / 2 - 30 || Math.abs(dy) > viewH / 2 - 30) {
+                const angle = Math.atan2(dy, dx);
+                const indicatorDist = Math.min(viewW, viewH) / 2 - 40;
+                const ix = camX + Math.cos(angle) * indicatorDist;
+                const iy = camY + Math.sin(angle) * indicatorDist;
+
+                ctx.save();
+                ctx.translate(ix, iy);
+                ctx.rotate(angle);
+                ctx.fillStyle = otherCar.color;
+                ctx.beginPath();
+                ctx.moveTo(12, 0);
+                ctx.lineTo(-8, -8);
+                ctx.lineTo(-8, 8);
+                ctx.closePath();
+                ctx.fill();
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.restore();
             }
-        });
 
-        // Sayaç Güncellemesi
-        setInterval(() => {
-            const now = Date.now();
-            const storedCooldown = parseInt(localStorage.getItem('r_place_cooldown')) || 0;
-            const timeLeft = storedCooldown - now;
-            const cooldownText = document.getElementById('cooldown-text');
+            ctx.restore();
+        }
 
-            if (timeLeft > 0) {
-                const minutes = Math.floor(timeLeft / (1000 * 60));
-                const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-                cooldownText.style.color = '#ff4500';
-                cooldownText.innerText = `Yeni piksel için bekleme süresi: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-            } else {
-                cooldownText.style.color = '#00ffcc';
-                cooldownText.innerText = "Piksel yerleştirmeye hazırsın! İstediğin yere tıkla.";
+        // Ana Oyun Döngüsü
+        function gameLoop() {
+            // Fizik Güncellemeleri
+            car1.update();
+            car2.update();
+            handleCollisions();
+
+            // Parçacıkları güncelle
+            for (let i = particles.length - 1; i >= 0; i--) {
+                let p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life--;
+                if (p.life <= 0) particles.splice(i, 1);
             }
-        }, 1000);
 
-        drawCanvas();
+            const halfW = canvas.width / 2;
+            const fullH = canvas.height;
+
+            // --- SOL EKRAN: 1. OYUNCU KAMERASI ---
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(0, 0, halfW, fullH);
+            ctx.clip();
+            drawWorld(ctx, car1.x, car1.y, halfW, fullH);
+            ctx.restore();
+
+            // --- SAĞ EKRAN: 2. OYUNCU KAMERASI ---
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(halfW, 0, halfW, fullH);
+            ctx.clip();
+            drawWorld(ctx, car2.x, car2.y, halfW, fullH);
+            ctx.restore();
+
+            // Ekranı Ortadan İkiye Bölen Kalın Çizgi
+            ctx.fillStyle = '#111';
+            ctx.fillRect(halfW - 3, 0, 6, fullH);
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Başlat
+        initWorld();
+        gameLoop();
     </script>
 </body>
 </html>
