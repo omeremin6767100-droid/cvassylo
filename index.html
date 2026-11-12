@@ -241,9 +241,9 @@
 
     <section class="hero">
         <div class="hero-text">
-            <span class="badge-free">GOOGLE DRIVE ARŞİVİ</span>
+            <span class="badge-free">GOOGLE DRIVE İNDİRME</span>
             <h1>cvassylo Oyun Mağazasına Hoş Geldin</h1>
-            <p>Paylaştığın Google Drive klasöründeki oyunları doğrudan tek tıkla indirebileceğin özel platformun.</p>
+            <p>İndir butonuna bastığın an doğrudan dosya indirmesini başlatan özel platformun.</p>
         </div>
     </section>
 
@@ -259,7 +259,7 @@
     </footer>
 
     <script>
-        // OYUN LİSTESİ (Drive linkin buraya eklenmiştir)
+        // OYUN LİSTESİ (Direkt indirme bağlantısı ile güncellendi)
         const games = [
             {
                 title: "Gang Beasts",
@@ -267,8 +267,9 @@
                 size: "2.1 GB",
                 description: "Renkli ve pelte gibi karakterlerle arkadaşlarını ringden, çatılardan ve tehlikeli platformlardan aşağı atmaya çalıştığın eğlenceli dövüş oyunu.",
                 bannerGradient: "linear-gradient(135deg, #ff4757, #ff6b81)",
-                status: "İNDİRİLEBİLİR",
-                downloadUrl: "https://drive.google.com/drive/folders/15Fnq7zUoVlSCDtfdpEzUi8FUrWU8NHlw?usp=drive_link"
+                status: "İNDİR",
+                // Klasör yerine doğrudan dosyayı indiren Google Drive Direct-Download bağlantısı:
+                downloadUrl: "https://drive.google.com/uc?export=download&id=15Fnq7zUoVlSCDtfdpEzUi8FUrWU8NHlw"
             }
         ];
 
@@ -291,8 +292,8 @@
                             <span>Tür: ${game.category}</span>
                             <span>Boyut: ${game.size}</span>
                         </div>
-                        <button class="download-btn" onclick="window.open('${game.downloadUrl}', '_blank')">
-                            İndir (Drive)
+                        <button class="download-btn" onclick="window.location.href='${game.downloadUrl}'">
+                            Hemen İndir
                         </button>
                     </div>
                 `;
@@ -306,7 +307,6 @@
             renderGames(filtered);
         }
 
-        // Sayfa açıldığında oyunları listele
         renderGames(games);
     </script>
 </body>
