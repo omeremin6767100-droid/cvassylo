@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>cvassylo - Pixel Side-Scroll Co-op Universe</title>
+    <title>cvassylo - Massive Pixel Open World Co-op</title>
     <style>
         * {
             margin: 0;
@@ -14,7 +14,7 @@
         }
 
         body {
-            background-color: #050508;
+            background-color: #030305;
             color: #f8fafc;
             min-height: 100vh;
             display: flex;
@@ -25,22 +25,22 @@
 
         header {
             width: 100%;
-            background-color: #0f1016;
-            padding: 12px 24px;
+            background-color: #0a0a0f;
+            padding: 12px 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 3px solid #1e1b4b;
-            z-index: 100;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.8);
+            z-index: 1000;
+            box-shadow: 0 4px 25px rgba(0,0,0,0.9);
         }
 
         .logo {
-            font-size: 24px;
+            font-size: 26px;
             font-weight: 900;
             color: #38bdf8;
             letter-spacing: 3px;
-            text-shadow: 0 0 10px rgba(56,189,248,0.5);
+            text-shadow: 0 0 12px rgba(56,189,248,0.6);
         }
 
         .logo span {
@@ -49,26 +49,26 @@
 
         .mode-container {
             display: flex;
-            gap: 8px;
+            gap: 10px;
         }
 
         .mode-btn {
             background-color: #1e1b4b;
             color: #cbd5e1;
             border: 2px solid #312e81;
-            padding: 6px 14px;
-            border-radius: 4px;
+            padding: 7px 16px;
+            border-radius: 6px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 13px;
             font-weight: bold;
             transition: all 0.2s;
         }
 
         .mode-btn.active, .mode-btn:hover {
             background-color: #38bdf8;
-            color: #050508;
+            color: #030305;
             border-color: #7dd3fc;
-            box-shadow: 0 0 12px rgba(56,189,248,0.6);
+            box-shadow: 0 0 15px rgba(56,189,248,0.7);
         }
 
         main {
@@ -79,15 +79,15 @@
             justify-content: center;
             position: relative;
             width: 100%;
-            background: radial-gradient(circle at center, #0f1016 0%, #050508 100%);
+            background: radial-gradient(circle at center, #0a0a12 0%, #030305 100%);
         }
 
         canvas {
-            background-color: #09090e;
+            background-color: #07070c;
             display: block;
             border: 4px solid #1e1b4b;
-            border-radius: 6px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.9);
+            border-radius: 8px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.95);
             image-rendering: pixelated;
             image-rendering: crisp-edges;
         }
@@ -95,45 +95,46 @@
         .hud-overlay {
             position: absolute;
             top: 20px;
-            left: 24px;
-            background: rgba(10, 10, 15, 0.9);
-            padding: 12px 18px;
+            left: 30px;
+            background: rgba(10, 10, 18, 0.92);
+            padding: 14px 22px;
             border: 2px solid #312e81;
-            border-radius: 6px;
-            font-size: 13px;
-            pointer-events: none;
-            line-height: 1.6;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.6);
-        }
-
-        .dialogue-box {
-            position: absolute;
-            bottom: 30px;
-            width: 800px;
-            background: rgba(10, 10, 15, 0.95);
-            border: 4px solid #38bdf8;
             border-radius: 8px;
-            padding: 20px;
-            font-size: 16px;
-            color: #f8fafc;
-            display: none;
-            box-shadow: 0 0 30px rgba(56,189,248,0.3);
-            z-index: 200;
+            font-size: 14px;
+            pointer-events: none;
+            line-height: 1.7;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.8);
+            z-index: 100;
         }
 
         .controls-hint {
             position: absolute;
-            bottom: 12px;
-            font-size: 11px;
+            bottom: 14px;
+            font-size: 12px;
             color: #64748b;
             letter-spacing: 1px;
+            background: rgba(3,3,5,0.8);
+            padding: 5px 15px;
+            border-radius: 4px;
+        }
+
+        /* CRT Scanline Effect Overlay */
+        .crt-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.25) 50%), linear-gradient(90deg, rgba(255,0,0,0.03), rgba(0,255,0,0.01), rgba(0,0,255,0.03));
+            background-size: 100% 4px, 6px 100%;
+            pointer-events: none;
+            z-index: 500;
         }
     </style>
 </head>
 <body>
 
+    <div class="crt-overlay"></div>
+
     <header>
-        <div class="logo">cvassylo<span>.</span>side</div>
+        <div class="logo">cvassylo<span>.</span>world</div>
         <div class="mode-container">
             <button class="mode-btn active" onclick="switchMode(1)">1. Açık Dünya</button>
             <button class="mode-btn" onclick="switchMode(2)">2. NPC Kaçış</button>
@@ -144,15 +145,14 @@
     </header>
 
     <main>
-        <div class="hud-overlay" id="hud">Mod: Açık Dünya (Yandan Görünüm)<br>P1 Can: ❤️❤️❤️ | P2 Can: ❤️❤️❤️</div>
-        <canvas id="gameCanvas" width="1024" height="576"></canvas>
-        <div class="dialogue-box" id="dialogueBox"></div>
-        <div class="controls-hint">P1: WASD + Space + F (Araca Bin) | P2: Yön Tuşları + G (Araca Bin)</div>
+        <div class="hud-overlay" id="hud">Mod: Açık Dünya<br>P1 Can: ❤️❤️❤️ | P2 Can: ❤️❤️❤️<br>Skor: 0</div>
+        <canvas id="gameCanvas" width="1152" height="648"></canvas>
+        <div class="controls-hint">P1: WASD + Space + F (Araca Bin) | P2: Yön Tuşları + Yukarı Ok + G (Araca Bin)</div>
     </main>
 
     <script>
         // ==========================================
-        // WEB AUDIO API - RETRO SOUND SYNTHESIZER
+        // 1. WEB AUDIO API - RETRO SOUND SYNTHESIZER
         // ==========================================
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -164,138 +164,165 @@
             const gain = audioCtx.createGain();
             osc.connect(gain);
             gain.connect(audioCtx.destination);
-
             let now = audioCtx.currentTime;
 
             if (type === 'jump') {
                 osc.type = 'square';
-                osc.frequency.setValueAtTime(150, now);
-                osc.frequency.exponentialRampToValueAtTime(400, now + 0.15);
-                gain.gain.setValueAtTime(0.1, now);
-                gain.gain.linearRampToValueAtTime(0, now + 0.15);
-                osc.start(now);
-                osc.stop(now + 0.15);
+                osc.frequency.setValueAtTime(160, now);
+                osc.frequency.exponentialRampToValueAtTime(440, now + 0.18);
+                gain.gain.setValueAtTime(0.12, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.18);
+                osc.start(now); osc.stop(now + 0.18);
             } else if (type === 'coin') {
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(600, now);
-                osc.frequency.setValueAtTime(900, now + 0.08);
+                osc.frequency.setValueAtTime(580, now);
+                osc.frequency.setValueAtTime(880, now + 0.08);
                 gain.gain.setValueAtTime(0.15, now);
-                gain.gain.linearRampToValueAtTime(0, now + 0.2);
-                osc.start(now);
-                osc.stop(now + 0.2);
+                gain.gain.linearRampToValueAtTime(0, now + 0.22);
+                osc.start(now); osc.stop(now + 0.22);
             } else if (type === 'hit') {
                 osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(120, now);
-                osc.frequency.linearRampToValueAtTime(40, now + 0.2);
+                osc.frequency.setValueAtTime(140, now);
+                osc.frequency.linearRampToValueAtTime(45, now + 0.25);
                 gain.gain.setValueAtTime(0.2, now);
-                gain.gain.linearRampToValueAtTime(0, now + 0.2);
-                osc.start(now);
-                osc.stop(now + 0.2);
+                gain.gain.linearRampToValueAtTime(0, now + 0.25);
+                osc.start(now); osc.stop(now + 0.25);
             } else if (type === 'car') {
                 osc.type = 'triangle';
-                osc.frequency.setValueAtTime(80, now);
-                osc.frequency.linearRampToValueAtTime(110, now + 0.1);
+                osc.frequency.setValueAtTime(90, now);
+                osc.frequency.linearRampToValueAtTime(130, now + 0.12);
                 gain.gain.setValueAtTime(0.1, now);
-                gain.gain.linearRampToValueAtTime(0, now + 0.1);
-                osc.start(now);
-                osc.stop(now + 0.1);
+                gain.gain.linearRampToValueAtTime(0, now + 0.12);
+                osc.start(now); osc.stop(now + 0.12);
             }
         }
 
         // ==========================================
-        // CANVAS & GAME SETUP
+        // 2. CANVAS & GLOBAL CONFIGURATION
         // ==========================================
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
         ctx.imageSmoothingEnabled = false;
 
-        const WORLD_WIDTH = 4000;
-        const WORLD_HEIGHT = 1200;
+        const WORLD_WIDTH = 7000;  // Devasa Geniş Harita
+        const WORLD_HEIGHT = 1600; // Geniş Dikey Alan (Yüksek binalar/dağlar)
         const GRAVITY = 0.55;
 
         let gameMode = 1;
-        let gameTime = 0;
-        let lavaY = WORLD_HEIGHT + 200;
+        let gameScore = 0;
+        let lavaY = WORLD_HEIGHT + 300;
+        let frameCount = 0;
 
-        // Input handler
+        // Particle System
+        let particles = [];
+        function spawnParticles(x, y, color, count = 10) {
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x: x, y: y,
+                    vx: (Math.random() - 0.5) * 6,
+                    vy: (Math.random() - 0.5) * 6,
+                    life: 30 + Math.random() * 20,
+                    color: color,
+                    size: 3 + Math.random() * 4
+                });
+            }
+        }
+
+        // Input Management
         const keys = {};
         window.addEventListener('keydown', e => {
             keys[e.code] = true;
-            if (e.code === 'Space') { e.preventDefault(); }
+            if (e.code === 'Space') e.preventDefault();
             if (e.code === 'KeyF') interactVehicle(p1);
             if (e.code === 'KeyG') interactVehicle(p2);
         });
-        window.addEventListener('keyup', e => {
-            keys[e.code] = false;
-        });
+        window.addEventListener('keyup', e => { keys[e.code] = false; });
 
         // ==========================================
-        // ENTITIES (PLAYERS, VEHICLES, PLATFORMS)
+        // 3. ENTITIES & MASSIVE WORLD GENERATION
         // ==========================================
         const p1 = {
-            x: 200, y: 900, w: 24, h: 36, vx: 0, vy: 0, 
-            speed: 4, jumpForce: -12, grounded: false, color: '#38bdf8', 
+            x: 200, y: 1200, w: 26, h: 40, vx: 0, vy: 0,
+            speed: 4.5, jumpForce: -13, grounded: false, color: '#38bdf8',
             hp: 3, inVehicle: null, facing: 1, name: 'P1'
         };
 
         const p2 = {
-            x: 250, y: 900, w: 24, h: 36, vx: 0, vy: 0, 
-            speed: 4, jumpForce: -12, grounded: false, color: '#10b981', 
+            x: 260, y: 1200, w: 26, h: 40, vx: 0, vy: 0,
+            speed: 4.5, jumpForce: -13, grounded: false, color: '#10b981',
             hp: 3, inVehicle: null, facing: 1, name: 'P2'
         };
 
-        // Platforms & World Geometry (Side-Scroll Terrain with High Areas & Buildings)
+        // Harita Yapıları: Zemin, Küçük Evler, Gökdelenler, Platformlar
         const platforms = [];
-        // Ground floor
-        platforms.push({ x: 0, y: 1000, w: WORLD_WIDTH, h: 200, type: 'ground', color: '#1e1b4b' });
+        // Ana Zemin
+        platforms.push({ x: 0, y: 1400, w: WORLD_WIDTH, h: 200, type: 'ground', color: '#0f172a' });
 
-        // Multilevel Platforms, Skyscrapers & Rooftops
-        for (let i = 400; i < WORLD_WIDTH - 300; i += 450) {
-            let bWidth = 280;
-            let bHeight = 350 + (i % 3) * 120;
-            // Building
-            platforms.push({ x: i, y: 1000 - bHeight, w: bWidth, h: bHeight, type: 'building', color: '#0f172a', trim: '#312e81' });
-            
-            // Connecting floating platforms & ladders
-            platforms.push({ x: i - 100, y: 1000 - bHeight - 120, w: 140, h: 20, type: 'platform', color: '#334155' });
-            platforms.push({ x: i + bWidth - 40, y: 1000 - bHeight - 220, w: 160, h: 20, type: 'platform', color: '#334155' });
+        // Rastgele küçük evler, büyük gökdelenler ve platformlar ekleme (1000+ satırlık detaylı harita)
+        for (let i = 300; i < WORLD_WIDTH - 400; i += 320) {
+            let isSmallHouse = (i % 640 === 0);
+            if (isSmallHouse) {
+                // Küçük Ev
+                let hWidth = 160;
+                let hHeight = 120;
+                platforms.push({ x: i, y: 1400 - hHeight, w: hWidth, h: hHeight, type: 'house', color: '#334155', roof: '#ef4444' });
+            } else {
+                // Gökdelen / Bina
+                let bWidth = 240;
+                let bHeight = 300 + ((i * 13) % 450);
+                platforms.push({ x: i, y: 1400 - bHeight, w: bWidth, h: bHeight, type: 'building', color: '#1e293b', trim: '#475569' });
+                
+                // Ara platformlar ve merdivenler
+                platforms.push({ x: i - 80, y: 1400 - bHeight - 100, w: 120, h: 18, type: 'platform', color: '#475569' });
+                platforms.push({ x: i + bWidth - 40, y: 1400 - bHeight - 200, w: 140, h: 18, type: 'platform', color: '#475569' });
+            }
         }
 
-        // Extra floating platforms high in the sky
-        for (let i = 200; i < WORLD_WIDTH; i += 300) {
-            platforms.push({ x: i, y: 350 + (i % 200), w: 180, h: 20, type: 'platform', color: '#475569' });
+        // Gökyüzünde dolaşan devasa platform zincirleri
+        for (let i = 150; i < WORLD_WIDTH; i += 280) {
+            platforms.push({ x: i, y: 400 + ((i * 7) % 500), w: 160, h: 20, type: 'platform', color: '#334155' });
         }
 
-        // Vehicles (Side-view cars)
+        // Sürülebilir Araçlar (F ve G tuşu ile binilen)
         const vehicles = [
-            { x: 600, y: 960, w: 70, h: 35, vx: 0, speed: 6, color: '#f43f5e', driver: null },
-            { x: 1800, y: 960, w: 70, h: 35, vx: 0, speed: 6, color: '#eab308', driver: null },
-            { x: 2800, y: 960, w: 70, h: 35, vx: 0, speed: 6, color: '#a855f7', driver: null }
+            { x: 800, y: 1360, w: 80, h: 40, vx: 0, speed: 7, color: '#f43f5e', driver: null },
+            { x: 2200, y: 1360, w: 80, h: 40, vx: 0, speed: 7, color: '#eab308', driver: null },
+            { x: 4100, y: 1360, w: 80, h: 40, vx: 0, speed: 7, color: '#a855f7', driver: null },
+            { x: 5800, y: 1360, w: 80, h: 40, vx: 0, speed: 7, color: '#06b6d4', driver: null }
         ];
 
-        // NPCs & Enemies
+        // NPC'ler, Düşmanlar ve Zombiler
         const entities = [];
-        for (let i = 0; i < 25; i++) {
+        for (let i = 0; i < 45; i++) {
             entities.push({
-                x: 500 + i * 150,
-                y: 960,
-                w: 24,
-                h: 36,
-                vx: (Math.random() - 0.5) * 2,
-                type: (i % 2 === 0) ? 'npc' : 'enemy',
-                dialogue: "Merhaba yolcu! cvassylo şehrine hoş geldin.",
+                x: 400 + i * 140,
+                y: 1360,
+                w: 26, h: 40,
+                vx: (Math.random() - 0.5) * 2.2,
+                type: (i % 3 === 0) ? 'enemy' : 'npc',
+                name: 'Yurttaş #' + i,
                 hp: 2
             });
         }
 
-        // Collectibles / Gold bags
+        // Altın Çantaları ve Nesneler
         const coins = [];
-        for (let i = 300; i < WORLD_WIDTH - 200; i += 220) {
-            coins.push({ x: i, y: 400 + (i % 400), collected: false });
+        for (let i = 250; i < WORLD_WIDTH - 200; i += 180) {
+            coins.push({ x: i, y: 350 + ((i * 11) % 800), collected: false });
+        }
+
+        // Çevresel Dekoratif Objeler (Ağaçlar, Sokak Lambaları, Kutular)
+        const decorations = [];
+        for (let i = 100; i < WORLD_WIDTH; i += 200) {
+            decorations.push({
+                x: i + Math.random() * 50,
+                y: 1400,
+                type: (i % 4 === 0) ? 'tree' : ((i % 4 === 1) ? 'lamp' : 'crate')
+            });
         }
 
         // ==========================================
-        // GAME MODES & SYSTEM FUNCTIONS
+        // 4. GAME MODES & SYSTEM LOGIC
         // ==========================================
         function switchMode(mode) {
             gameMode = mode;
@@ -303,26 +330,25 @@
                 if (idx + 1 === mode) btn.classList.add('active');
                 else btn.classList.remove('active');
             });
-            if (mode === 3) lavaY = WORLD_HEIGHT + 200;
-            const titles = ["Açık Dünya", "NPC Kaçış", "Yükselen Lav", "Altın Avı", "Zombi Kuşatması"];
+            if (mode === 3) lavaY = WORLD_HEIGHT + 300;
             updateHUD();
         }
 
         function updateHUD() {
             let titles = ["Açık Dünya", "NPC Kaçış", "Yükselen Lav", "Altın Avı", "Zombi Kuşatması"];
-            document.getElementById('hud').innerHTML = `Mod: ${titles[gameMode-1]} (Yandan Görünüm)<br>P1 Can: ${'❤️'.repeat(Math.max(0,p1.hp))} | P2 Can: ${'❤️'.repeat(Math.max(0,p2.hp))}`;
+            document.getElementById('hud').innerHTML = `Mod: ${titles[gameMode-1]}<br>P1 Can: ${'❤️'.repeat(Math.max(0,p1.hp))} | P2 Can: ${'❤️'.repeat(Math.max(0,p2.hp))}<br>Skor: ${gameScore}`;
         }
 
         function interactVehicle(player) {
             if (player.inVehicle) {
-                // Exit vehicle
-                player.x = player.inVehicle.x + 80;
+                player.x = player.inVehicle.x + 90;
                 player.y = player.inVehicle.y;
                 player.inVehicle.driver = null;
                 player.inVehicle = null;
+                playSound('car');
             } else {
                 vehicles.forEach(v => {
-                    if (!v.driver && Math.hypot(v.x - player.x, v.y - player.y) < 60) {
+                    if (!v.driver && Math.hypot(v.x - player.x, v.y - player.y) < 70) {
                         v.driver = player;
                         player.inVehicle = v;
                         playSound('car');
@@ -332,7 +358,7 @@
         }
 
         // ==========================================
-        // PHYSICS & COLLISION ENGINE
+        // 5. PHYSICS & COLLISION DETECTION
         // ==========================================
         function rectIntersect(r1, r2) {
             return r1.x < r2.x + r2.w && r1.x + r1.w > r2.x &&
@@ -342,20 +368,18 @@
         function updatePlayer(p, leftKey, rightKey, jumpKey) {
             if (p.inVehicle) {
                 let v = p.inVehicle;
-                if (keys[leftKey]) { v.x -= v.speed; v.facing = -1; playSound('car'); }
-                if (keys[rightKey]) { v.x += v.speed; v.facing = 1; playSound('car'); }
+                if (keys[leftKey]) { v.x -= v.speed; v.facing = -1; playSound('car'); spawnParticles(v.x + v.w, v.y + v.h, '#64748b', 1); }
+                if (keys[rightKey]) { v.x += v.speed; v.facing = 1; playSound('car'); spawnParticles(v.x, v.y + v.h, '#64748b', 1); }
                 p.x = v.x + v.w / 2;
-                p.y = v.y - 10;
+                p.y = v.y - 12;
                 return;
             }
 
-            // Horizontal movement
             p.vx = 0;
             if (keys[leftKey]) { p.vx = -p.speed; p.facing = -1; }
             if (keys[rightKey]) { p.vx = p.speed; p.facing = 1; }
 
             p.x += p.vx;
-            // Wall collisions (X axis)
             platforms.forEach(plat => {
                 if (rectIntersect(p, plat)) {
                     if (p.vx > 0) p.x = plat.x - p.w;
@@ -363,19 +387,17 @@
                 }
             });
 
-            // Vertical movement & gravity
             p.vy += GRAVITY;
             p.y += p.vy;
             p.grounded = false;
 
-            // Platform collisions (Y axis)
             platforms.forEach(plat => {
                 if (rectIntersect(p, plat)) {
-                    if (p.vy > 0) { // Landing
+                    if (p.vy > 0) {
                         p.y = plat.y - p.h;
                         p.vy = 0;
                         p.grounded = true;
-                    } else if (p.vy < 0) { // Hitting ceiling
+                    } else if (p.vy < 0) {
                         p.y = plat.y + plat.h;
                         p.vy = 0;
                     }
@@ -386,71 +408,80 @@
                 p.vy = p.jumpForce;
                 p.grounded = false;
                 playSound('jump');
+                spawnParticles(p.x + p.w/2, p.y + p.h, p.color, 5);
             }
 
-            // Boundaries
             if (p.x < 0) p.x = 0;
             if (p.x > WORLD_WIDTH - p.w) p.x = WORLD_WIDTH - p.w;
             if (p.y > WORLD_HEIGHT) {
                 p.hp--;
-                p.y = 800;
-                p.x = 200;
+                p.y = 800; p.x = 200;
                 playSound('hit');
                 updateHUD();
             }
         }
 
         // ==========================================
-        // GAME LOOP UPDATE
+        // 6. GAME UPDATE LOOP
         // ==========================================
         function update() {
-            gameTime++;
+            frameCount++;
 
-            // Mode 3: Rising Lava
+            // Mode 3: Yükselen Lav
             if (gameMode === 3) {
-                lavaY -= 0.35;
-                if (p1.y > lavaY) { p1.hp--; p1.y = 300; playSound('hit'); updateHUD(); }
-                if (p2.y > lavaY) { p2.hp--; p2.y = 300; playSound('hit'); updateHUD(); }
+                lavaY -= 0.45;
+                if (p1.y > lavaY) { p1.hp--; p1.y = 200; playSound('hit'); updateHUD(); }
+                if (p2.y > lavaY) { p2.hp--; p2.y = 200; playSound('hit'); updateHUD(); }
             }
 
-            // Update Players (P1: WASD + Space, P2: Arrows + Up)
+            // Update Players
             updatePlayer(p1, 'KeyA', 'KeyD', 'Space');
             updatePlayer(p2, 'ArrowLeft', 'ArrowRight', 'ArrowUp');
 
-            // Entities / NPCs / Zombies AI
+            // Update Entities / NPCs / Zombies
             entities.forEach(en => {
                 en.x += en.vx;
-                if (en.x < 100 || en.x > WORLD_WIDTH - 100) en.vx *= -1;
+                if (en.x < 150 || en.x > WORLD_WIDTH - 150) en.vx *= -1;
 
                 if (gameMode === 2 || gameMode === 5) {
                     let target = Math.hypot(p1.x - en.x, p1.y - en.y) < Math.hypot(p2.x - en.x, p2.y - en.y) ? p1 : p2;
-                    if (en.x < target.x) en.x += 1.2;
-                    else en.x -= 1.2;
+                    if (en.x < target.x) en.x += 1.4;
+                    else en.x -= 1.4;
 
-                    // Damage check
-                    if (rectIntersect(p1, en)) { p1.hp -= 0.05; updateHUD(); }
-                    if (rectIntersect(p2, en)) { p2.hp -= 0.05; updateHUD(); }
+                    if (rectIntersect(p1, en)) { p1.hp -= 0.04; updateHUD(); }
+                    if (rectIntersect(p2, en)) { p2.hp -= 0.04; updateHUD(); }
                 }
             });
 
-            // Coins / Gold Collection (Mode 4)
+            // Update Coins / Gold Bags (Mode 4)
             coins.forEach(c => {
                 if (!c.collected) {
-                    if (Math.hypot(p1.x - c.x, p1.y - c.y) < 25 || Math.hypot(p2.x - c.x, p2.y - c.y) < 25) {
+                    if (Math.hypot(p1.x - c.x, p1.y - c.y) < 28 || Math.hypot(p2.x - c.x, p2.y - c.y) < 28) {
                         c.collected = true;
+                        gameScore += 10;
                         playSound('coin');
+                        spawnParticles(c.x, c.y, '#facc15', 8);
+                        updateHUD();
                     }
                 }
+            });
+
+            // Update Particles
+            particles.forEach((pt, idx) => {
+                pt.x += pt.vx;
+                pt.y += pt.vy;
+                pt.life--;
+                if (pt.life <= 0) particles.splice(idx, 1);
             });
         }
 
         // ==========================================
-        // RENDER ENGINE (PIXEL ART / UNDERTALE VIBE)
+        // 7. RENDER ENGINE (PIXEL ART / UNDERTALE VIBE)
         // ==========================================
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Camera tracking (Center between P1 & P2)
+            // Camera tracking (Center between P1 and P2)
             let camX = (p1.x + p2.x) / 2 - canvas.width / 2;
             let camY = (p1.y + p2.y) / 2 - canvas.height / 2;
 
@@ -460,82 +491,136 @@
             ctx.save();
             ctx.translate(-camX, -camY);
 
-            // Background Starry Retro Sky
-            ctx.fillStyle = '#050508';
+            // Background Night Sky Gradient
+            ctx.fillStyle = '#05050a';
             ctx.fillRect(camX, camY, canvas.width, canvas.height);
 
-            // Draw Platforms & Skyscrapers
+            // Draw Parallax Stars
+            ctx.fillStyle = '#38bdf8';
+            for (let i = 0; i < 120; i++) {
+                let sx = (i * 317) % WORLD_WIDTH;
+                let sy = (i * 199) % 800;
+                ctx.fillRect(sx, sy, 2, 2);
+            }
+
+            // Draw Platforms, Houses and Buildings
             platforms.forEach(plat => {
                 ctx.fillStyle = plat.color;
                 ctx.fillRect(plat.x, plat.y, plat.w, plat.h);
-                if (plat.trim) {
-                    ctx.fillStyle = plat.trim;
-                    ctx.fillRect(plat.x, plat.y, plat.w, 10);
+
+                if (plat.type === 'house') {
+                    // Ev çatısı
+                    ctx.fillStyle = plat.roof;
+                    ctx.beginPath();
+                    ctx.moveTo(plat.x - 10, plat.y);
+                    ctx.lineTo(plat.x + plat.w / 2, plat.y - 45);
+                    ctx.lineTo(plat.x + plat.w + 10, plat.y);
+                    ctx.fill();
+                    // Ev kapısı ve pencereler
+                    ctx.fillStyle = '#1e293b';
+                    ctx.fillRect(plat.x + plat.w/2 - 15, plat.y + plat.h - 40, 30, 40);
+                    ctx.fillStyle = '#fbbf24';
+                    ctx.fillRect(plat.x + 20, plat.y + 25, 25, 25);
+                    ctx.fillRect(plat.x + plat.w - 45, plat.y + 25, 25, 25);
+                } else if (plat.type === 'building') {
+                    ctx.fillStyle = plat.trim || '#334155';
+                    ctx.fillRect(plat.x, plat.y, plat.w, 12);
+                    // Pencereler gridi
+                    ctx.fillStyle = '#38bdf8';
+                    for (let wx = plat.x + 20; wx < plat.x + plat.w - 25; wx += 40) {
+                        for (let wy = plat.y + 30; wy < plat.y + plat.h - 30; wy += 50) {
+                            ctx.fillRect(wx, wy, 20, 30);
+                        }
+                    }
                 }
             });
 
-            // Draw Coins
-            if (gameMode === 4) {
-                ctx.fillStyle = '#facc15';
-                coins.forEach(c => {
-                    if (!c.collected) {
-                        ctx.fillRect(c.x - 6, c.y - 6, 12, 12);
-                        ctx.fillStyle = '#fef08a';
-                        ctx.fillRect(c.x - 3, c.y - 3, 6, 6);
-                        ctx.fillStyle = '#facc15';
-                    }
-                });
-            }
+            // Draw Environmental Decorations (Trees, Lamps, Crates)
+            decorations.forEach(dec => {
+                if (dec.type === 'tree') {
+                    ctx.fillStyle = '#78350f'; // Gövde
+                    ctx.fillRect(dec.x, dec.y - 50, 16, 50);
+                    ctx.fillStyle = '#15803d'; // Yapraklar
+                    ctx.beginPath(); ctx.arc(dec.x + 8, dec.y - 65, 30, 0, Math.PI*2); ctx.fill();
+                } else if (dec.type === 'lamp') {
+                    ctx.fillStyle = '#475569';
+                    ctx.fillRect(dec.x, dec.y - 90, 8, 90);
+                    ctx.fillStyle = '#facc15'; // lamba ışığı
+                    ctx.beginPath(); ctx.arc(dec.x + 4, dec.y - 95, 10, 0, Math.PI*2); ctx.fill();
+                } else if (dec.type === 'crate') {
+                    ctx.fillStyle = '#9a3412';
+                    ctx.fillRect(dec.x, dec.y - 30, 30, 30);
+                    ctx.strokeStyle = '#c2410c'; ctx.lineWidth = 2;
+                    ctx.strokeRect(dec.x, dec.y - 30, 30, 30);
+                }
+            });
+
+            // Draw Coins / Gold
+            ctx.fillStyle = '#facc15';
+            coins.forEach(c => {
+                if (!c.collected) {
+                    ctx.fillRect(c.x - 7, c.y - 7, 14, 14);
+                    ctx.fillStyle = '#fef08a';
+                    ctx.fillRect(c.x - 3, c.y - 3, 6, 6);
+                    ctx.fillStyle = '#facc15';
+                }
+            });
 
             // Draw Vehicles
             vehicles.forEach(v => {
                 ctx.fillStyle = v.color;
                 ctx.fillRect(v.x, v.y, v.w, v.h);
-                ctx.fillStyle = '#1e293b'; // Windshield
-                ctx.fillRect(v.x + 15, v.y - 10, 30, 12);
-                // Wheels
+                ctx.fillStyle = '#0f172a'; // Ön cam
+                ctx.fillRect(v.x + 18, v.y - 12, 35, 14);
+                // Tekerlekler
                 ctx.fillStyle = '#000';
-                ctx.fillRect(v.x + 8, v.y + v.h - 4, 12, 10);
-                ctx.fillRect(v.x + v.w - 20, v.y + v.h - 4, 12, 10);
+                ctx.fillRect(v.x + 10, v.y + v.h - 4, 14, 10);
+                ctx.fillRect(v.x + v.w - 24, v.y + v.h - 4, 14, 10);
             });
 
-            // Draw Entities / NPCs
+            // Draw NPCs / Enemies
             entities.forEach(en => {
                 ctx.fillStyle = (gameMode === 5) ? '#22c55e' : '#cbd5e1';
                 ctx.fillRect(en.x, en.y, en.w, en.h);
-                ctx.fillStyle = '#000'; // Eyes
-                ctx.fillRect(en.x + 6, en.y + 8, 4, 4);
-                ctx.fillRect(en.x + 14, en.y + 8, 4, 4);
+                ctx.fillStyle = '#000'; // Gözler
+                ctx.fillRect(en.x + 6, en.y + 10, 5, 5);
+                ctx.fillRect(en.x + 15, en.y + 10, 5, 5);
             });
 
-            // Draw Player 1 (Undertale Blue Soul Vibe)
+            // Draw Player 1
             if (!p1.inVehicle) {
                 ctx.fillStyle = p1.color;
                 ctx.fillRect(p1.x, p1.y, p1.w, p1.h);
-                ctx.fillStyle = '#fff'; // Face details
-                ctx.fillRect(p1.x + (p1.facing > 0 ? 14 : 4), p1.y + 8, 6, 6);
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(p1.x + (p1.facing > 0 ? 15 : 5), p1.y + 10, 6, 6);
                 ctx.fillStyle = '#000';
-                ctx.font = 'bold 10px Courier';
+                ctx.font = 'bold 11px Courier';
                 ctx.fillText('P1', p1.x + 4, p1.y - 6);
             }
 
-            // Draw Player 2 (Green Soul Vibe)
+            // Draw Player 2
             if (!p2.inVehicle) {
                 ctx.fillStyle = p2.color;
                 ctx.fillRect(p2.x, p2.y, p2.w, p2.h);
                 ctx.fillStyle = '#fff';
-                ctx.fillRect(p2.x + (p2.facing > 0 ? 14 : 4), p2.y + 8, 6, 6);
+                ctx.fillRect(p2.x + (p2.facing > 0 ? 15 : 5), p2.y + 10, 6, 6);
                 ctx.fillStyle = '#000';
-                ctx.font = 'bold 10px Courier';
+                ctx.font = 'bold 11px Courier';
                 ctx.fillText('P2', p2.x + 4, p2.y - 6);
             }
 
+            // Draw Particles
+            particles.forEach(pt => {
+                ctx.fillStyle = pt.color;
+                ctx.fillRect(pt.x, pt.y, pt.size, pt.size);
+            });
+
             // Draw Rising Lava (Mode 3)
             if (gameMode === 3) {
-                ctx.fillStyle = 'rgba(239, 68, 68, 0.9)';
+                ctx.fillStyle = 'rgba(239, 68, 68, 0.92)';
                 ctx.fillRect(0, lavaY, WORLD_WIDTH, WORLD_HEIGHT - lavaY);
                 ctx.fillStyle = '#fca5a5';
-                ctx.fillRect(0, lavaY, WORLD_WIDTH, 8);
+                ctx.fillRect(0, lavaY, WORLD_WIDTH, 10);
             }
 
             ctx.restore();
