@@ -3,306 +3,429 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>cvassylo - Ücretsiz Oyun İndirme Platformu</title>
+    <title>cvassylo - 2D Pixel Open World Co-op</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Courier New', Courier, monospace;
         }
 
         body {
-            background-color: #0f172a;
+            background-color: #090d16;
             color: #f8fafc;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            align-items: center;
+            overflow: hidden;
         }
 
-        /* Üst Menü */
         header {
+            width: 100%;
             background-color: #1e293b;
-            padding: 20px 40px;
+            padding: 10px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 2px solid #334155;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            z-index: 10;
         }
 
         .logo {
-            font-size: 28px;
-            font-weight: 800;
-            letter-spacing: 1px;
+            font-size: 22px;
+            font-weight: bold;
             color: #38bdf8;
-            text-transform: lowercase;
+            letter-spacing: 2px;
         }
 
         .logo span {
             color: #f43f5e;
         }
 
-        nav a {
-            color: #cbd5e1;
-            text-decoration: none;
-            margin-left: 25px;
-            font-weight: 500;
-            transition: color 0.3s;
-        }
-
-        nav a:hover {
-            color: #38bdf8;
-        }
-
-        /* Ana İçerik */
-        main {
-            flex: 1;
-            max-width: 1100px;
-            width: 100%;
-            margin: 40px auto;
-            padding: 0 20px;
-        }
-
-        .hero {
-            text-align: center;
-            margin-bottom: 50px;
-        }
-
-        .hero h1 {
-            font-size: 36px;
-            margin-bottom: 10px;
-        }
-
-        .hero p {
-            color: #94a3b8;
-            font-size: 16px;
-        }
-
-        /* Oyun Kartları Grid */
-        .games-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 25px;
-        }
-
-        .game-card {
-            background-color: #1e293b;
-            border-radius: 12px;
-            overflow: hidden;
-            border: 1px solid #334155;
-            transition: transform 0.3s, box-shadow 0.3s;
+        .mode-selector {
             display: flex;
-            flex-direction: column;
+            gap: 10px;
         }
 
-        .game-card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 10px 25px rgba(56, 189, 248, 0.15);
+        .mode-btn {
+            background-color: #334155;
+            color: #cbd5e1;
+            border: 1px solid #475569;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .mode-btn.active, .mode-btn:hover {
+            background-color: #38bdf8;
+            color: #0f172a;
             border-color: #38bdf8;
         }
 
-        /* Oyun Kapak Alanı */
-        .game-banner {
-            height: 170px;
-            background: linear-gradient(135deg, #f97316, #ec4899);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 26px;
-            font-weight: 900;
-            color: #fff;
-            text-shadow: 2px 2px 8px rgba(0,0,0,0.4);
-            position: relative;
-        }
-
-        .badge {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            background-color: #0f172a;
-            color: #38bdf8;
-            font-size: 12px;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-weight: bold;
-        }
-
-        .game-info {
-            padding: 20px;
+        main {
             flex: 1;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .game-title {
-            font-size: 22px;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-
-        .game-desc {
-            color: #94a3b8;
-            font-size: 14px;
-            line-height: 1.5;
-            margin-bottom: 20px;
-        }
-
-        .download-btn {
-            width: 100%;
-            padding: 12px;
-            background-color: #38bdf8;
-            color: #0f172a;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: background-color 0.2s, transform 0.1s;
-        }
-
-        .download-btn:hover {
-            background-color: #0284c7;
-            color: #fff;
-        }
-
-        .download-btn:active {
-            transform: scale(0.98);
-        }
-
-        /* Özel Uyarı Penceresi (Modal) */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            display: none;
-            justify-content: center;
             align-items: center;
-            z-index: 1000;
+            justify-content: center;
+            position: relative;
+            width: 100%;
         }
 
-        .modal-box {
-            background-color: #1e293b;
-            border: 2px solid #f43f5e;
-            padding: 30px;
-            border-radius: 14px;
+        canvas {
+            background-color: #111827;
+            display: block;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+
+        .hud {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            background: rgba(15, 23, 42, 0.85);
+            padding: 10px 15px;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            font-size: 13px;
+            pointer-events: none;
+            line-height: 1.5;
+        }
+
+        .controls-info {
+            position: absolute;
+            bottom: 10px;
+            background: rgba(15, 23, 42, 0.85);
+            padding: 6px 15px;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            font-size: 11px;
+            color: #94a3b8;
+            pointer-events: none;
             text-align: center;
-            max-width: 350px;
-            width: 90%;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            animation: popIn 0.2s ease-out;
-        }
-
-        @keyframes popIn {
-            from { transform: scale(0.8); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-
-        .modal-box h3 {
-            font-size: 24px;
-            color: #f43f5e;
-            margin-bottom: 10px;
-        }
-
-        .modal-box p {
-            color: #cbd5e1;
-            margin-bottom: 20px;
-        }
-
-        .close-btn {
-            background-color: #334155;
-            color: #fff;
-            border: none;
-            padding: 10px 25px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-
-        .close-btn:hover {
-            background-color: #475569;
-        }
-
-        /* Alt Bilgi */
-        footer {
-            text-align: center;
-            padding: 20px;
-            background-color: #1e293b;
-            color: #64748b;
-            font-size: 14px;
-            border-top: 1px solid #334155;
         }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="logo">cvassylo<span>.</span></div>
-        <nav>
-            <a href="#">Ana Sayfa</a>
-            <a href="#">Oyunlar</a>
-            <a href="#">İletişim</a>
-        </nav>
+        <div class="logo">cvassylo<span>.</span>io</div>
+        <div class="mode-selector">
+            <button class="mode-btn active" onclick="setGameMode(1)">1. Açık Dünya</button>
+            <button class="mode-btn" onclick="setGameMode(2)">2. NPC Kaçış</button>
+            <button class="mode-btn" onclick="setGameMode(3)">3. Yükselen Lav</button>
+            <button class="mode-btn" onclick="setGameMode(4)">4. Banka Soygunu</button>
+            <button class="mode-btn" onclick="setGameMode(5)">5. Zombi Kıyameti</button>
+        </div>
     </header>
 
     <main>
-        <section class="hero">
-            <h1>En İyi Ücretsiz Oyunlar</h1>
-            <p>Arkadaşlarınla oynayabileceğin en eğlenceli oyunları tek tıkla keşfet.</p>
-        </section>
-
-        <section class="games-grid">
-            <!-- Pico Park 2 Kartı -->
-            <div class="game-card">
-                <div class="game-banner">
-                    <span class="badge">Çok Oyunculu</span>
-                    PICO PARK 2
-                </div>
-                <div class="game-info">
-                    <div>
-                        <h2 class="game-title">Pico Park 2</h2>
-                        <p class="game-desc">Arkadaşlarınla işbirliği yaparak bulmacaları çöz ve tüm anahtarları toplayıp kapıya ulaş!</p>
-                    </div>
-                    <button class="download-btn" onclick="uyariGoster()">İndir</button>
-                </div>
-            </div>
-        </section>
+        <div class="hud" id="hud">Mod: Açık Dünya<br>P1: WASD + F (Araca Bin)<br>P2: Ok Tuşları + G (Araca Bin)</div>
+        <canvas id="gameCanvas" width="900" height="550"></canvas>
+        <div class="controls-info">P1 (Mavi): WASD | P2 (Yeşil): Ok Tuşları | F / G: Araca Bin / İnce Ayar</div>
     </main>
 
-    <!-- Uyarı Kutusu -->
-    <div class="modal-overlay" id="uyariModal">
-        <div class="modal-box">
-            <h3>Daha gelmedi</h3>
-            <p>Pico Park 2 henüz sitemize yüklenmedi. Çok yakında eklenecek!</p>
-            <button class="close-btn" onclick="uyariKapat()">Tamam</button>
-        </div>
-    </div>
-
-    <footer>
-        &copy; 2026 cvassylo - Tüm Hakları Saklıdır.
-    </footer>
-
     <script>
-        function uyariGoster() {
-            document.getElementById('uyariModal').style.display = 'flex';
-        }
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        ctx.imageSmoothingEnabled = false;
 
-        function uyariKapat() {
-            document.getElementById('uyariModal').style.display = 'none';
-        }
+        // Dünya Boyutu (Büyük Şehir)
+        const WORLD_WIDTH = 2400;
+        const WORLD_HEIGHT = 2400;
 
-        // Kutunun dışına tıklayınca da kapansın
-        window.onclick = function(event) {
-            const modal = document.getElementById('uyariModal');
-            if (event.target === modal) {
-                modal.style.display = 'none';
+        let gameMode = 1; // 1: Açık Dünya, 2: NPC Kaçış, 3: Lav, 4: Banka Soygunu, 5: Zombi
+
+        // Oyun Durumları
+        let lavaY = WORLD_HEIGHT + 200; // Lav yüksekliği (Mod 3 için)
+        let gameScore = 0;
+
+        // Tuş Kontrolleri
+        const keys = {};
+        window.addEventListener('keydown', e => {
+            keys[e.code] = true;
+            if (e.code === 'KeyF') interactCar(p1);
+            if (e.code === 'KeyG') interactCar(p2);
+        });
+        window.addEventListener('keyup', e => { keys[e.code] = false; });
+
+        // Oyuncular
+        const p1 = {
+            x: 1200, y: 1200, radius: 10, speed: 3.5, color: '#38bdf8', 
+            inCar: null, score: 0, name: 'P1'
+        };
+        const p2 = {
+            x: 1230, y: 1200, radius: 10, speed: 3.5, color: '#10b981', 
+            inCar: null, score: 0, name: 'P2'
+        };
+
+        // Binalar (Şehir Yapısı ve Yüksek Alanlar / Çatılar)
+        const buildings = [];
+        for (let x = 200; x < WORLD_WIDTH - 300; x += 320) {
+            for (let y = 200; y < WORLD_HEIGHT - 300; y += 320) {
+                buildings.push({
+                    x: x, y: y, w: 220, h: 220, color: '#1e293b', roofColor: '#334155'
+                });
             }
         }
-    </script>
 
+        // Arabalar (F ile binilen)
+        const cars = [
+            { x: 1100, y: 1150, w: 40, h: 20, vx: 0, vy: 0, angle: 0, speed: 0, driver: null, color: '#f43f5e' },
+            { x: 1300, y: 1150, w: 40, h: 20, vx: 0, vy: 0, angle: 0, speed: 0, driver: null, color: '#eab308' },
+            { x: 1200, y: 1000, w: 40, h: 20, vx: 0, vy: 0, angle: 0, speed: 0, driver: null, color: '#a855f7' }
+        ];
+
+        // NPC'ler / Zombiler / Polisler
+        const npcs = [];
+        for (let i = 0; i < 40; i++) {
+            npcs.push({
+                x: Math.random() * WORLD_WIDTH,
+                y: Math.random() * WORLD_HEIGHT,
+                vx: (Math.random() - 0.5) * 1.5,
+                vy: (Math.random() - 0.5) * 1.5,
+                type: 'citizen' // citizen, cop, zombie
+            });
+        }
+
+        // Para / Altın Torbaları (Mod 4 için)
+        const goldBags = [];
+        for (let i = 0; i < 15; i++) {
+            goldBags.push({ x: 300 + Math.random() * (WORLD_WIDTH - 600), y: 300 + Math.random() * (WORLD_HEIGHT - 600), collected: false });
+        }
+
+        function setGameMode(mode) {
+            gameMode = mode;
+            document.querySelectorAll('.mode-btn').forEach((btn, idx) => {
+                if (idx + 1 === mode) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+            
+            if (mode === 3) {
+                lavaY = WORLD_HEIGHT + 300; // Lav sıfırlama
+            }
+            
+            const titles = ["Açık Dünya", "NPC Kaçış", "Yükselen Lav", "Banka Soygunu", "Zombi Kıyameti"];
+            document.getElementById('hud').innerHTML = `Mod: ${titles[mode-1]}<br>P1: WASD + F | P2: Oklar + G`;
+        }
+
+        function interactCar(player) {
+            if (player.inCar) {
+                // Araçtan çık
+                player.x = player.inCar.x + 50;
+                player.y = player.inCar.y;
+                player.inCar.driver = null;
+                player.inCar = null;
+            } else {
+                // Yakındaki arabayı bul
+                cars.forEach(car => {
+                    if (!car.driver) {
+                        let dist = Math.hypot(car.x - player.x, car.y - player.y);
+                        if (dist < 50) {
+                            car.driver = player;
+                            player.inCar = car;
+                        }
+                    }
+                });
+            }
+        }
+
+        // Çarpışma Kontrolü (Binalar)
+        function checkCollision(nx, ny, r) {
+            for (let b of buildings) {
+                if (nx + r > b.x && nx - r < b.x + b.w && ny + r > b.y && ny - r < b.y + b.h) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function update() {
+            // Mod 3: Lav yükselmesi
+            if (gameMode === 3) {
+                lavaY -= 0.4;
+                if (p1.y > lavaY) p1.y = 1200; // Lav ölme reset
+                if (p2.y > lavaY) p2.y = 1200;
+            }
+
+            // --- OYUNCU 1 HAREKETİ ---
+            if (p1.inCar) {
+                let car = p1.inCar;
+                if (keys['KeyW']) car.speed = Math.min(car.speed + 0.2, 6);
+                else if (keys['KeyS']) car.speed = Math.max(car.speed - 0.2, -3);
+                else car.speed *= 0.95;
+
+                if (keys['KeyA']) car.angle -= 0.05;
+                if (keys['KeyD']) car.angle += 0.05;
+
+                car.x += Math.cos(car.angle) * car.speed;
+                car.y += Math.sin(car.angle) * car.speed;
+                p1.x = car.x;
+                p1.y = car.y;
+            } else {
+                let dx = 0, dy = 0;
+                if (keys['KeyW']) dy -= p1.speed;
+                if (keys['KeyS']) dy += p1.speed;
+                if (keys['KeyA']) dx -= p1.speed;
+                if (keys['KeyD']) dx += p1.speed;
+
+                if (!checkCollision(p1.x + dx, p1.y, p1.radius)) p1.x += dx;
+                if (!checkCollision(p1.x, p1.y + dy, p1.radius)) p1.y += dy;
+            }
+
+            // --- OYUNCU 2 HAREKETİ ---
+            if (p2.inCar) {
+                let car = p2.inCar;
+                if (keys['ArrowUp']) car.speed = Math.min(car.speed + 0.2, 6);
+                else if (keys['ArrowDown']) car.speed = Math.max(car.speed - 0.2, -3);
+                else car.speed *= 0.95;
+
+                if (keys['ArrowLeft']) car.angle -= 0.05;
+                if (keys['ArrowRight']) car.angle += 0.05;
+
+                car.x += Math.cos(car.angle) * car.speed;
+                car.y += Math.sin(car.angle) * car.speed;
+                p2.x = car.x;
+                p2.y = car.y;
+            } else {
+                let dx = 0, dy = 0;
+                if (keys['ArrowUp']) dy -= p2.speed;
+                if (keys['ArrowDown']) dy += p2.speed;
+                if (keys['ArrowLeft']) dx -= p2.speed;
+                if (keys['ArrowRight']) dx += p2.speed;
+
+                if (!checkCollision(p2.x + dx, p2.y, p2.radius)) p2.x += dx;
+                if (!checkCollision(p2.x, p2.y + dy, p2.radius)) p2.y += dy;
+            }
+
+            // --- NPC / ZOMBİ HAREKETLERİ ---
+            npcs.forEach(n => {
+                n.x += n.vx;
+                n.y += n.vy;
+                if (n.x < 100 || n.x > WORLD_WIDTH - 100) n.vx *= -1;
+                if (n.y < 100 || n.y > WORLD_HEIGHT - 100) n.vy *= -1;
+
+                if (gameMode === 2 || gameMode === 5) {
+                    // Oyuncuyu takip etme yapay zekası
+                    let target = Math.hypot(p1.x - n.x, p1.y - n.y) < Math.hypot(p2.x - n.x, p2.y - n.y) ? p1 : p2;
+                    let angle = Math.atan2(target.y - n.y, target.x - n.x);
+                    n.x += Math.cos(angle) * 1.2;
+                    n.y += Math.sin(angle) * 1.2;
+                }
+            });
+
+            // --- BANKA SOYGUNU MODU ---
+            if (gameMode === 4) {
+                goldBags.forEach(bag => {
+                    if (!bag.collected) {
+                        if (Math.hypot(p1.x - bag.x, p1.y - bag.y) < 20) { bag.collected = true; p1.score++; }
+                        if (Math.hypot(p2.x - bag.x, p2.y - bag.y) < 20) { bag.collected = true; p2.score++; }
+                    }
+                });
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Kamera Takip (İki oyuncunun orta noktası)
+            let camX = (p1.x + p2.x) / 2 - canvas.width / 2;
+            let camY = (p1.y + p2.y) / 2 - canvas.height / 2;
+
+            // Sınırla
+            camX = Math.max(0, Math.min(camX, WORLD_WIDTH - canvas.width));
+            camY = Math.max(0, Math.min(camY, WORLD_HEIGHT - canvas.height));
+
+            ctx.save();
+            ctx.translate(-camX, -camY);
+
+            // Zemin (Yollar ve Çim)
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+
+            // Izgara Yollar
+            ctx.strokeStyle = '#334155';
+            ctx.lineWidth = 40;
+            for (let x = 300; x < WORLD_WIDTH; x += 320) {
+                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, WORLD_HEIGHT); ctx.stroke();
+            }
+            for (let y = 300; y < WORLD_HEIGHT; y += 320) {
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(WORLD_WIDTH, y); ctx.stroke();
+            }
+
+            // Binalar ve Çatılar (Yüksek Alanlar)
+            buildings.forEach(b => {
+                ctx.fillStyle = b.color;
+                ctx.fillRect(b.x, b.y, b.w, b.h);
+                // Çatı efekti
+                ctx.fillStyle = b.roofColor;
+                ctx.fillRect(b.x + 15, b.y + 15, b.w - 30, b.h - 30);
+            });
+
+            // Altın Torbaları (Mod 4)
+            if (gameMode === 4) {
+                ctx.fillStyle = '#facc15';
+                goldBags.forEach(bag => {
+                    if (!bag.collected) {
+                        ctx.fillRect(bag.x - 6, bag.y - 6, 12, 12);
+                    }
+                });
+            }
+
+            // Arabalar
+            cars.forEach(car => {
+                ctx.save();
+                ctx.translate(car.x, car.y);
+                ctx.rotate(car.angle);
+                ctx.fillStyle = car.color;
+                ctx.fillRect(-car.w / 2, -car.h / 2, car.w, car.h);
+                ctx.fillStyle = '#000'; // Ön cam
+                ctx.fillRect(5, -car.h / 2 + 3, 8, car.h - 6);
+                ctx.restore();
+            });
+
+            // NPC / Zombiler
+            npcs.forEach(n => {
+                ctx.fillStyle = gameMode === 5 ? '#22c55e' : (gameMode === 2 ? '#ef4444' : '#94a3b8');
+                ctx.fillRect(n.x - 6, n.y - 6, 12, 12);
+            });
+
+            // Oyuncu 1 (Eğer arabadaysa çizme)
+            if (!p1.inCar) {
+                ctx.fillStyle = p1.color;
+                ctx.beginPath(); ctx.arc(p1.x, p1.y, p1.radius, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = '#fff'; ctx.font = '10px Courier'; ctx.fillText('P1', p1.x - 6, p1.y - 14);
+            }
+
+            // Oyuncu 2
+            if (!p2.inCar) {
+                ctx.fillStyle = p2.color;
+                ctx.beginPath(); ctx.arc(p2.x, p2.y, p2.radius, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = '#fff'; ctx.font = '10px Courier'; ctx.fillText('P2', p2.x - 6, p2.y - 14);
+            }
+
+            // Mod 3: Yükselen Lav Çizimi
+            if (gameMode === 3) {
+                ctx.fillStyle = 'rgba(239, 68, 68, 0.85)';
+                ctx.fillRect(0, lavaY, WORLD_WIDTH, WORLD_HEIGHT - lavaY);
+            }
+
+            ctx.restore();
+        }
+
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        gameLoop();
+    </script>
 </body>
 </html>
