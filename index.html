@@ -3,17 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>cvassylo - 2D Pixel Open World Co-op</title>
+    <title>cvassylo - Pixel Side-Scroll Co-op Universe</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             font-family: 'Courier New', Courier, monospace;
+            user-select: none;
         }
 
         body {
-            background-color: #090d16;
+            background-color: #050508;
             color: #f8fafc;
             min-height: 100vh;
             display: flex;
@@ -24,47 +25,50 @@
 
         header {
             width: 100%;
-            background-color: #1e293b;
-            padding: 10px 20px;
+            background-color: #0f1016;
+            padding: 12px 24px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 2px solid #334155;
-            z-index: 10;
+            border-bottom: 3px solid #1e1b4b;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.8);
         }
 
         .logo {
-            font-size: 22px;
-            font-weight: bold;
+            font-size: 24px;
+            font-weight: 900;
             color: #38bdf8;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px rgba(56,189,248,0.5);
         }
 
         .logo span {
             color: #f43f5e;
         }
 
-        .mode-selector {
+        .mode-container {
             display: flex;
-            gap: 10px;
+            gap: 8px;
         }
 
         .mode-btn {
-            background-color: #334155;
+            background-color: #1e1b4b;
             color: #cbd5e1;
-            border: 1px solid #475569;
-            padding: 6px 12px;
+            border: 2px solid #312e81;
+            padding: 6px 14px;
             border-radius: 4px;
             cursor: pointer;
             font-size: 12px;
             font-weight: bold;
-            transition: 0.2s;
+            transition: all 0.2s;
         }
 
         .mode-btn.active, .mode-btn:hover {
             background-color: #38bdf8;
-            color: #0f172a;
-            border-color: #38bdf8;
+            color: #050508;
+            border-color: #7dd3fc;
+            box-shadow: 0 0 12px rgba(56,189,248,0.6);
         }
 
         main {
@@ -75,357 +79,475 @@
             justify-content: center;
             position: relative;
             width: 100%;
+            background: radial-gradient(circle at center, #0f1016 0%, #050508 100%);
         }
 
         canvas {
-            background-color: #111827;
+            background-color: #09090e;
             display: block;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            border: 4px solid #1e1b4b;
+            border-radius: 6px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.9);
             image-rendering: pixelated;
             image-rendering: crisp-edges;
         }
 
-        .hud {
+        .hud-overlay {
             position: absolute;
-            top: 15px;
-            left: 20px;
-            background: rgba(15, 23, 42, 0.85);
-            padding: 10px 15px;
-            border: 1px solid #334155;
+            top: 20px;
+            left: 24px;
+            background: rgba(10, 10, 15, 0.9);
+            padding: 12px 18px;
+            border: 2px solid #312e81;
             border-radius: 6px;
             font-size: 13px;
             pointer-events: none;
-            line-height: 1.5;
+            line-height: 1.6;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.6);
         }
 
-        .controls-info {
+        .dialogue-box {
             position: absolute;
-            bottom: 10px;
-            background: rgba(15, 23, 42, 0.85);
-            padding: 6px 15px;
-            border: 1px solid #334155;
-            border-radius: 6px;
+            bottom: 30px;
+            width: 800px;
+            background: rgba(10, 10, 15, 0.95);
+            border: 4px solid #38bdf8;
+            border-radius: 8px;
+            padding: 20px;
+            font-size: 16px;
+            color: #f8fafc;
+            display: none;
+            box-shadow: 0 0 30px rgba(56,189,248,0.3);
+            z-index: 200;
+        }
+
+        .controls-hint {
+            position: absolute;
+            bottom: 12px;
             font-size: 11px;
-            color: #94a3b8;
-            pointer-events: none;
-            text-align: center;
+            color: #64748b;
+            letter-spacing: 1px;
         }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="logo">cvassylo<span>.</span>io</div>
-        <div class="mode-selector">
-            <button class="mode-btn active" onclick="setGameMode(1)">1. Açık Dünya</button>
-            <button class="mode-btn" onclick="setGameMode(2)">2. NPC Kaçış</button>
-            <button class="mode-btn" onclick="setGameMode(3)">3. Yükselen Lav</button>
-            <button class="mode-btn" onclick="setGameMode(4)">4. Banka Soygunu</button>
-            <button class="mode-btn" onclick="setGameMode(5)">5. Zombi Kıyameti</button>
+        <div class="logo">cvassylo<span>.</span>side</div>
+        <div class="mode-container">
+            <button class="mode-btn active" onclick="switchMode(1)">1. Açık Dünya</button>
+            <button class="mode-btn" onclick="switchMode(2)">2. NPC Kaçış</button>
+            <button class="mode-btn" onclick="switchMode(3)">3. Yükselen Lav</button>
+            <button class="mode-btn" onclick="switchMode(4)">4. Altın Avı</button>
+            <button class="mode-btn" onclick="switchMode(5)">5. Zombi Kuşatması</button>
         </div>
     </header>
 
     <main>
-        <div class="hud" id="hud">Mod: Açık Dünya<br>P1: WASD + F (Araca Bin)<br>P2: Ok Tuşları + G (Araca Bin)</div>
-        <canvas id="gameCanvas" width="900" height="550"></canvas>
-        <div class="controls-info">P1 (Mavi): WASD | P2 (Yeşil): Ok Tuşları | F / G: Araca Bin / İnce Ayar</div>
+        <div class="hud-overlay" id="hud">Mod: Açık Dünya (Yandan Görünüm)<br>P1 Can: ❤️❤️❤️ | P2 Can: ❤️❤️❤️</div>
+        <canvas id="gameCanvas" width="1024" height="576"></canvas>
+        <div class="dialogue-box" id="dialogueBox"></div>
+        <div class="controls-hint">P1: WASD + Space + F (Araca Bin) | P2: Yön Tuşları + G (Araca Bin)</div>
     </main>
 
     <script>
+        // ==========================================
+        // WEB AUDIO API - RETRO SOUND SYNTHESIZER
+        // ==========================================
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            if (!audioCtx) return;
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            let now = audioCtx.currentTime;
+
+            if (type === 'jump') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.exponentialRampToValueAtTime(400, now + 0.15);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.15);
+                osc.start(now);
+                osc.stop(now + 0.15);
+            } else if (type === 'coin') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(600, now);
+                osc.frequency.setValueAtTime(900, now + 0.08);
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.2);
+                osc.start(now);
+                osc.stop(now + 0.2);
+            } else if (type === 'hit') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(120, now);
+                osc.frequency.linearRampToValueAtTime(40, now + 0.2);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.2);
+                osc.start(now);
+                osc.stop(now + 0.2);
+            } else if (type === 'car') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(80, now);
+                osc.frequency.linearRampToValueAtTime(110, now + 0.1);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.1);
+                osc.start(now);
+                osc.stop(now + 0.1);
+            }
+        }
+
+        // ==========================================
+        // CANVAS & GAME SETUP
+        // ==========================================
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
         ctx.imageSmoothingEnabled = false;
 
-        // Dünya Boyutu (Büyük Şehir)
-        const WORLD_WIDTH = 2400;
-        const WORLD_HEIGHT = 2400;
+        const WORLD_WIDTH = 4000;
+        const WORLD_HEIGHT = 1200;
+        const GRAVITY = 0.55;
 
-        let gameMode = 1; // 1: Açık Dünya, 2: NPC Kaçış, 3: Lav, 4: Banka Soygunu, 5: Zombi
+        let gameMode = 1;
+        let gameTime = 0;
+        let lavaY = WORLD_HEIGHT + 200;
 
-        // Oyun Durumları
-        let lavaY = WORLD_HEIGHT + 200; // Lav yüksekliği (Mod 3 için)
-        let gameScore = 0;
-
-        // Tuş Kontrolleri
+        // Input handler
         const keys = {};
         window.addEventListener('keydown', e => {
             keys[e.code] = true;
-            if (e.code === 'KeyF') interactCar(p1);
-            if (e.code === 'KeyG') interactCar(p2);
+            if (e.code === 'Space') { e.preventDefault(); }
+            if (e.code === 'KeyF') interactVehicle(p1);
+            if (e.code === 'KeyG') interactVehicle(p2);
         });
-        window.addEventListener('keyup', e => { keys[e.code] = false; });
+        window.addEventListener('keyup', e => {
+            keys[e.code] = false;
+        });
 
-        // Oyuncular
+        // ==========================================
+        // ENTITIES (PLAYERS, VEHICLES, PLATFORMS)
+        // ==========================================
         const p1 = {
-            x: 1200, y: 1200, radius: 10, speed: 3.5, color: '#38bdf8', 
-            inCar: null, score: 0, name: 'P1'
-        };
-        const p2 = {
-            x: 1230, y: 1200, radius: 10, speed: 3.5, color: '#10b981', 
-            inCar: null, score: 0, name: 'P2'
+            x: 200, y: 900, w: 24, h: 36, vx: 0, vy: 0, 
+            speed: 4, jumpForce: -12, grounded: false, color: '#38bdf8', 
+            hp: 3, inVehicle: null, facing: 1, name: 'P1'
         };
 
-        // Binalar (Şehir Yapısı ve Yüksek Alanlar / Çatılar)
-        const buildings = [];
-        for (let x = 200; x < WORLD_WIDTH - 300; x += 320) {
-            for (let y = 200; y < WORLD_HEIGHT - 300; y += 320) {
-                buildings.push({
-                    x: x, y: y, w: 220, h: 220, color: '#1e293b', roofColor: '#334155'
-                });
-            }
+        const p2 = {
+            x: 250, y: 900, w: 24, h: 36, vx: 0, vy: 0, 
+            speed: 4, jumpForce: -12, grounded: false, color: '#10b981', 
+            hp: 3, inVehicle: null, facing: 1, name: 'P2'
+        };
+
+        // Platforms & World Geometry (Side-Scroll Terrain with High Areas & Buildings)
+        const platforms = [];
+        // Ground floor
+        platforms.push({ x: 0, y: 1000, w: WORLD_WIDTH, h: 200, type: 'ground', color: '#1e1b4b' });
+
+        // Multilevel Platforms, Skyscrapers & Rooftops
+        for (let i = 400; i < WORLD_WIDTH - 300; i += 450) {
+            let bWidth = 280;
+            let bHeight = 350 + (i % 3) * 120;
+            // Building
+            platforms.push({ x: i, y: 1000 - bHeight, w: bWidth, h: bHeight, type: 'building', color: '#0f172a', trim: '#312e81' });
+            
+            // Connecting floating platforms & ladders
+            platforms.push({ x: i - 100, y: 1000 - bHeight - 120, w: 140, h: 20, type: 'platform', color: '#334155' });
+            platforms.push({ x: i + bWidth - 40, y: 1000 - bHeight - 220, w: 160, h: 20, type: 'platform', color: '#334155' });
         }
 
-        // Arabalar (F ile binilen)
-        const cars = [
-            { x: 1100, y: 1150, w: 40, h: 20, vx: 0, vy: 0, angle: 0, speed: 0, driver: null, color: '#f43f5e' },
-            { x: 1300, y: 1150, w: 40, h: 20, vx: 0, vy: 0, angle: 0, speed: 0, driver: null, color: '#eab308' },
-            { x: 1200, y: 1000, w: 40, h: 20, vx: 0, vy: 0, angle: 0, speed: 0, driver: null, color: '#a855f7' }
+        // Extra floating platforms high in the sky
+        for (let i = 200; i < WORLD_WIDTH; i += 300) {
+            platforms.push({ x: i, y: 350 + (i % 200), w: 180, h: 20, type: 'platform', color: '#475569' });
+        }
+
+        // Vehicles (Side-view cars)
+        const vehicles = [
+            { x: 600, y: 960, w: 70, h: 35, vx: 0, speed: 6, color: '#f43f5e', driver: null },
+            { x: 1800, y: 960, w: 70, h: 35, vx: 0, speed: 6, color: '#eab308', driver: null },
+            { x: 2800, y: 960, w: 70, h: 35, vx: 0, speed: 6, color: '#a855f7', driver: null }
         ];
 
-        // NPC'ler / Zombiler / Polisler
-        const npcs = [];
-        for (let i = 0; i < 40; i++) {
-            npcs.push({
-                x: Math.random() * WORLD_WIDTH,
-                y: Math.random() * WORLD_HEIGHT,
-                vx: (Math.random() - 0.5) * 1.5,
-                vy: (Math.random() - 0.5) * 1.5,
-                type: 'citizen' // citizen, cop, zombie
+        // NPCs & Enemies
+        const entities = [];
+        for (let i = 0; i < 25; i++) {
+            entities.push({
+                x: 500 + i * 150,
+                y: 960,
+                w: 24,
+                h: 36,
+                vx: (Math.random() - 0.5) * 2,
+                type: (i % 2 === 0) ? 'npc' : 'enemy',
+                dialogue: "Merhaba yolcu! cvassylo şehrine hoş geldin.",
+                hp: 2
             });
         }
 
-        // Para / Altın Torbaları (Mod 4 için)
-        const goldBags = [];
-        for (let i = 0; i < 15; i++) {
-            goldBags.push({ x: 300 + Math.random() * (WORLD_WIDTH - 600), y: 300 + Math.random() * (WORLD_HEIGHT - 600), collected: false });
+        // Collectibles / Gold bags
+        const coins = [];
+        for (let i = 300; i < WORLD_WIDTH - 200; i += 220) {
+            coins.push({ x: i, y: 400 + (i % 400), collected: false });
         }
 
-        function setGameMode(mode) {
+        // ==========================================
+        // GAME MODES & SYSTEM FUNCTIONS
+        // ==========================================
+        function switchMode(mode) {
             gameMode = mode;
             document.querySelectorAll('.mode-btn').forEach((btn, idx) => {
                 if (idx + 1 === mode) btn.classList.add('active');
                 else btn.classList.remove('active');
             });
-            
-            if (mode === 3) {
-                lavaY = WORLD_HEIGHT + 300; // Lav sıfırlama
-            }
-            
-            const titles = ["Açık Dünya", "NPC Kaçış", "Yükselen Lav", "Banka Soygunu", "Zombi Kıyameti"];
-            document.getElementById('hud').innerHTML = `Mod: ${titles[mode-1]}<br>P1: WASD + F | P2: Oklar + G`;
+            if (mode === 3) lavaY = WORLD_HEIGHT + 200;
+            const titles = ["Açık Dünya", "NPC Kaçış", "Yükselen Lav", "Altın Avı", "Zombi Kuşatması"];
+            updateHUD();
         }
 
-        function interactCar(player) {
-            if (player.inCar) {
-                // Araçtan çık
-                player.x = player.inCar.x + 50;
-                player.y = player.inCar.y;
-                player.inCar.driver = null;
-                player.inCar = null;
+        function updateHUD() {
+            let titles = ["Açık Dünya", "NPC Kaçış", "Yükselen Lav", "Altın Avı", "Zombi Kuşatması"];
+            document.getElementById('hud').innerHTML = `Mod: ${titles[gameMode-1]} (Yandan Görünüm)<br>P1 Can: ${'❤️'.repeat(Math.max(0,p1.hp))} | P2 Can: ${'❤️'.repeat(Math.max(0,p2.hp))}`;
+        }
+
+        function interactVehicle(player) {
+            if (player.inVehicle) {
+                // Exit vehicle
+                player.x = player.inVehicle.x + 80;
+                player.y = player.inVehicle.y;
+                player.inVehicle.driver = null;
+                player.inVehicle = null;
             } else {
-                // Yakındaki arabayı bul
-                cars.forEach(car => {
-                    if (!car.driver) {
-                        let dist = Math.hypot(car.x - player.x, car.y - player.y);
-                        if (dist < 50) {
-                            car.driver = player;
-                            player.inCar = car;
-                        }
+                vehicles.forEach(v => {
+                    if (!v.driver && Math.hypot(v.x - player.x, v.y - player.y) < 60) {
+                        v.driver = player;
+                        player.inVehicle = v;
+                        playSound('car');
                     }
                 });
             }
         }
 
-        // Çarpışma Kontrolü (Binalar)
-        function checkCollision(nx, ny, r) {
-            for (let b of buildings) {
-                if (nx + r > b.x && nx - r < b.x + b.w && ny + r > b.y && ny - r < b.y + b.h) {
-                    return true;
-                }
-            }
-            return false;
+        // ==========================================
+        // PHYSICS & COLLISION ENGINE
+        // ==========================================
+        function rectIntersect(r1, r2) {
+            return r1.x < r2.x + r2.w && r1.x + r1.w > r2.x &&
+                   r1.y < r2.y + r2.h && r1.y + r1.h > r2.y;
         }
 
-        function update() {
-            // Mod 3: Lav yükselmesi
-            if (gameMode === 3) {
-                lavaY -= 0.4;
-                if (p1.y > lavaY) p1.y = 1200; // Lav ölme reset
-                if (p2.y > lavaY) p2.y = 1200;
+        function updatePlayer(p, leftKey, rightKey, jumpKey) {
+            if (p.inVehicle) {
+                let v = p.inVehicle;
+                if (keys[leftKey]) { v.x -= v.speed; v.facing = -1; playSound('car'); }
+                if (keys[rightKey]) { v.x += v.speed; v.facing = 1; playSound('car'); }
+                p.x = v.x + v.w / 2;
+                p.y = v.y - 10;
+                return;
             }
 
-            // --- OYUNCU 1 HAREKETİ ---
-            if (p1.inCar) {
-                let car = p1.inCar;
-                if (keys['KeyW']) car.speed = Math.min(car.speed + 0.2, 6);
-                else if (keys['KeyS']) car.speed = Math.max(car.speed - 0.2, -3);
-                else car.speed *= 0.95;
+            // Horizontal movement
+            p.vx = 0;
+            if (keys[leftKey]) { p.vx = -p.speed; p.facing = -1; }
+            if (keys[rightKey]) { p.vx = p.speed; p.facing = 1; }
 
-                if (keys['KeyA']) car.angle -= 0.05;
-                if (keys['KeyD']) car.angle += 0.05;
-
-                car.x += Math.cos(car.angle) * car.speed;
-                car.y += Math.sin(car.angle) * car.speed;
-                p1.x = car.x;
-                p1.y = car.y;
-            } else {
-                let dx = 0, dy = 0;
-                if (keys['KeyW']) dy -= p1.speed;
-                if (keys['KeyS']) dy += p1.speed;
-                if (keys['KeyA']) dx -= p1.speed;
-                if (keys['KeyD']) dx += p1.speed;
-
-                if (!checkCollision(p1.x + dx, p1.y, p1.radius)) p1.x += dx;
-                if (!checkCollision(p1.x, p1.y + dy, p1.radius)) p1.y += dy;
-            }
-
-            // --- OYUNCU 2 HAREKETİ ---
-            if (p2.inCar) {
-                let car = p2.inCar;
-                if (keys['ArrowUp']) car.speed = Math.min(car.speed + 0.2, 6);
-                else if (keys['ArrowDown']) car.speed = Math.max(car.speed - 0.2, -3);
-                else car.speed *= 0.95;
-
-                if (keys['ArrowLeft']) car.angle -= 0.05;
-                if (keys['ArrowRight']) car.angle += 0.05;
-
-                car.x += Math.cos(car.angle) * car.speed;
-                car.y += Math.sin(car.angle) * car.speed;
-                p2.x = car.x;
-                p2.y = car.y;
-            } else {
-                let dx = 0, dy = 0;
-                if (keys['ArrowUp']) dy -= p2.speed;
-                if (keys['ArrowDown']) dy += p2.speed;
-                if (keys['ArrowLeft']) dx -= p2.speed;
-                if (keys['ArrowRight']) dx += p2.speed;
-
-                if (!checkCollision(p2.x + dx, p2.y, p2.radius)) p2.x += dx;
-                if (!checkCollision(p2.x, p2.y + dy, p2.radius)) p2.y += dy;
-            }
-
-            // --- NPC / ZOMBİ HAREKETLERİ ---
-            npcs.forEach(n => {
-                n.x += n.vx;
-                n.y += n.vy;
-                if (n.x < 100 || n.x > WORLD_WIDTH - 100) n.vx *= -1;
-                if (n.y < 100 || n.y > WORLD_HEIGHT - 100) n.vy *= -1;
-
-                if (gameMode === 2 || gameMode === 5) {
-                    // Oyuncuyu takip etme yapay zekası
-                    let target = Math.hypot(p1.x - n.x, p1.y - n.y) < Math.hypot(p2.x - n.x, p2.y - n.y) ? p1 : p2;
-                    let angle = Math.atan2(target.y - n.y, target.x - n.x);
-                    n.x += Math.cos(angle) * 1.2;
-                    n.y += Math.sin(angle) * 1.2;
+            p.x += p.vx;
+            // Wall collisions (X axis)
+            platforms.forEach(plat => {
+                if (rectIntersect(p, plat)) {
+                    if (p.vx > 0) p.x = plat.x - p.w;
+                    else if (p.vx < 0) p.x = plat.x + plat.w;
                 }
             });
 
-            // --- BANKA SOYGUNU MODU ---
-            if (gameMode === 4) {
-                goldBags.forEach(bag => {
-                    if (!bag.collected) {
-                        if (Math.hypot(p1.x - bag.x, p1.y - bag.y) < 20) { bag.collected = true; p1.score++; }
-                        if (Math.hypot(p2.x - bag.x, p2.y - bag.y) < 20) { bag.collected = true; p2.score++; }
+            // Vertical movement & gravity
+            p.vy += GRAVITY;
+            p.y += p.vy;
+            p.grounded = false;
+
+            // Platform collisions (Y axis)
+            platforms.forEach(plat => {
+                if (rectIntersect(p, plat)) {
+                    if (p.vy > 0) { // Landing
+                        p.y = plat.y - p.h;
+                        p.vy = 0;
+                        p.grounded = true;
+                    } else if (p.vy < 0) { // Hitting ceiling
+                        p.y = plat.y + plat.h;
+                        p.vy = 0;
                     }
-                });
+                }
+            });
+
+            if (keys[jumpKey] && p.grounded) {
+                p.vy = p.jumpForce;
+                p.grounded = false;
+                playSound('jump');
+            }
+
+            // Boundaries
+            if (p.x < 0) p.x = 0;
+            if (p.x > WORLD_WIDTH - p.w) p.x = WORLD_WIDTH - p.w;
+            if (p.y > WORLD_HEIGHT) {
+                p.hp--;
+                p.y = 800;
+                p.x = 200;
+                playSound('hit');
+                updateHUD();
             }
         }
 
+        // ==========================================
+        // GAME LOOP UPDATE
+        // ==========================================
+        function update() {
+            gameTime++;
+
+            // Mode 3: Rising Lava
+            if (gameMode === 3) {
+                lavaY -= 0.35;
+                if (p1.y > lavaY) { p1.hp--; p1.y = 300; playSound('hit'); updateHUD(); }
+                if (p2.y > lavaY) { p2.hp--; p2.y = 300; playSound('hit'); updateHUD(); }
+            }
+
+            // Update Players (P1: WASD + Space, P2: Arrows + Up)
+            updatePlayer(p1, 'KeyA', 'KeyD', 'Space');
+            updatePlayer(p2, 'ArrowLeft', 'ArrowRight', 'ArrowUp');
+
+            // Entities / NPCs / Zombies AI
+            entities.forEach(en => {
+                en.x += en.vx;
+                if (en.x < 100 || en.x > WORLD_WIDTH - 100) en.vx *= -1;
+
+                if (gameMode === 2 || gameMode === 5) {
+                    let target = Math.hypot(p1.x - en.x, p1.y - en.y) < Math.hypot(p2.x - en.x, p2.y - en.y) ? p1 : p2;
+                    if (en.x < target.x) en.x += 1.2;
+                    else en.x -= 1.2;
+
+                    // Damage check
+                    if (rectIntersect(p1, en)) { p1.hp -= 0.05; updateHUD(); }
+                    if (rectIntersect(p2, en)) { p2.hp -= 0.05; updateHUD(); }
+                }
+            });
+
+            // Coins / Gold Collection (Mode 4)
+            coins.forEach(c => {
+                if (!c.collected) {
+                    if (Math.hypot(p1.x - c.x, p1.y - c.y) < 25 || Math.hypot(p2.x - c.x, p2.y - c.y) < 25) {
+                        c.collected = true;
+                        playSound('coin');
+                    }
+                }
+            });
+        }
+
+        // ==========================================
+        // RENDER ENGINE (PIXEL ART / UNDERTALE VIBE)
+        // ==========================================
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Kamera Takip (İki oyuncunun orta noktası)
+            // Camera tracking (Center between P1 & P2)
             let camX = (p1.x + p2.x) / 2 - canvas.width / 2;
             let camY = (p1.y + p2.y) / 2 - canvas.height / 2;
 
-            // Sınırla
             camX = Math.max(0, Math.min(camX, WORLD_WIDTH - canvas.width));
             camY = Math.max(0, Math.min(camY, WORLD_HEIGHT - canvas.height));
 
             ctx.save();
             ctx.translate(-camX, -camY);
 
-            // Zemin (Yollar ve Çim)
-            ctx.fillStyle = '#0f172a';
-            ctx.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+            // Background Starry Retro Sky
+            ctx.fillStyle = '#050508';
+            ctx.fillRect(camX, camY, canvas.width, canvas.height);
 
-            // Izgara Yollar
-            ctx.strokeStyle = '#334155';
-            ctx.lineWidth = 40;
-            for (let x = 300; x < WORLD_WIDTH; x += 320) {
-                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, WORLD_HEIGHT); ctx.stroke();
-            }
-            for (let y = 300; y < WORLD_HEIGHT; y += 320) {
-                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(WORLD_WIDTH, y); ctx.stroke();
-            }
-
-            // Binalar ve Çatılar (Yüksek Alanlar)
-            buildings.forEach(b => {
-                ctx.fillStyle = b.color;
-                ctx.fillRect(b.x, b.y, b.w, b.h);
-                // Çatı efekti
-                ctx.fillStyle = b.roofColor;
-                ctx.fillRect(b.x + 15, b.y + 15, b.w - 30, b.h - 30);
+            // Draw Platforms & Skyscrapers
+            platforms.forEach(plat => {
+                ctx.fillStyle = plat.color;
+                ctx.fillRect(plat.x, plat.y, plat.w, plat.h);
+                if (plat.trim) {
+                    ctx.fillStyle = plat.trim;
+                    ctx.fillRect(plat.x, plat.y, plat.w, 10);
+                }
             });
 
-            // Altın Torbaları (Mod 4)
+            // Draw Coins
             if (gameMode === 4) {
                 ctx.fillStyle = '#facc15';
-                goldBags.forEach(bag => {
-                    if (!bag.collected) {
-                        ctx.fillRect(bag.x - 6, bag.y - 6, 12, 12);
+                coins.forEach(c => {
+                    if (!c.collected) {
+                        ctx.fillRect(c.x - 6, c.y - 6, 12, 12);
+                        ctx.fillStyle = '#fef08a';
+                        ctx.fillRect(c.x - 3, c.y - 3, 6, 6);
+                        ctx.fillStyle = '#facc15';
                     }
                 });
             }
 
-            // Arabalar
-            cars.forEach(car => {
-                ctx.save();
-                ctx.translate(car.x, car.y);
-                ctx.rotate(car.angle);
-                ctx.fillStyle = car.color;
-                ctx.fillRect(-car.w / 2, -car.h / 2, car.w, car.h);
-                ctx.fillStyle = '#000'; // Ön cam
-                ctx.fillRect(5, -car.h / 2 + 3, 8, car.h - 6);
-                ctx.restore();
+            // Draw Vehicles
+            vehicles.forEach(v => {
+                ctx.fillStyle = v.color;
+                ctx.fillRect(v.x, v.y, v.w, v.h);
+                ctx.fillStyle = '#1e293b'; // Windshield
+                ctx.fillRect(v.x + 15, v.y - 10, 30, 12);
+                // Wheels
+                ctx.fillStyle = '#000';
+                ctx.fillRect(v.x + 8, v.y + v.h - 4, 12, 10);
+                ctx.fillRect(v.x + v.w - 20, v.y + v.h - 4, 12, 10);
             });
 
-            // NPC / Zombiler
-            npcs.forEach(n => {
-                ctx.fillStyle = gameMode === 5 ? '#22c55e' : (gameMode === 2 ? '#ef4444' : '#94a3b8');
-                ctx.fillRect(n.x - 6, n.y - 6, 12, 12);
+            // Draw Entities / NPCs
+            entities.forEach(en => {
+                ctx.fillStyle = (gameMode === 5) ? '#22c55e' : '#cbd5e1';
+                ctx.fillRect(en.x, en.y, en.w, en.h);
+                ctx.fillStyle = '#000'; // Eyes
+                ctx.fillRect(en.x + 6, en.y + 8, 4, 4);
+                ctx.fillRect(en.x + 14, en.y + 8, 4, 4);
             });
 
-            // Oyuncu 1 (Eğer arabadaysa çizme)
-            if (!p1.inCar) {
+            // Draw Player 1 (Undertale Blue Soul Vibe)
+            if (!p1.inVehicle) {
                 ctx.fillStyle = p1.color;
-                ctx.beginPath(); ctx.arc(p1.x, p1.y, p1.radius, 0, Math.PI * 2); ctx.fill();
-                ctx.fillStyle = '#fff'; ctx.font = '10px Courier'; ctx.fillText('P1', p1.x - 6, p1.y - 14);
+                ctx.fillRect(p1.x, p1.y, p1.w, p1.h);
+                ctx.fillStyle = '#fff'; // Face details
+                ctx.fillRect(p1.x + (p1.facing > 0 ? 14 : 4), p1.y + 8, 6, 6);
+                ctx.fillStyle = '#000';
+                ctx.font = 'bold 10px Courier';
+                ctx.fillText('P1', p1.x + 4, p1.y - 6);
             }
 
-            // Oyuncu 2
-            if (!p2.inCar) {
+            // Draw Player 2 (Green Soul Vibe)
+            if (!p2.inVehicle) {
                 ctx.fillStyle = p2.color;
-                ctx.beginPath(); ctx.arc(p2.x, p2.y, p2.radius, 0, Math.PI * 2); ctx.fill();
-                ctx.fillStyle = '#fff'; ctx.font = '10px Courier'; ctx.fillText('P2', p2.x - 6, p2.y - 14);
+                ctx.fillRect(p2.x, p2.y, p2.w, p2.h);
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(p2.x + (p2.facing > 0 ? 14 : 4), p2.y + 8, 6, 6);
+                ctx.fillStyle = '#000';
+                ctx.font = 'bold 10px Courier';
+                ctx.fillText('P2', p2.x + 4, p2.y - 6);
             }
 
-            // Mod 3: Yükselen Lav Çizimi
+            // Draw Rising Lava (Mode 3)
             if (gameMode === 3) {
-                ctx.fillStyle = 'rgba(239, 68, 68, 0.85)';
+                ctx.fillStyle = 'rgba(239, 68, 68, 0.9)';
                 ctx.fillRect(0, lavaY, WORLD_WIDTH, WORLD_HEIGHT - lavaY);
+                ctx.fillStyle = '#fca5a5';
+                ctx.fillRect(0, lavaY, WORLD_WIDTH, 8);
             }
 
             ctx.restore();
         }
 
-        function gameLoop() {
+        function mainLoop() {
             update();
             draw();
-            requestAnimationFrame(gameLoop);
+            requestAnimationFrame(mainLoop);
         }
 
-        gameLoop();
+        mainLoop();
     </script>
 </body>
 </html>
