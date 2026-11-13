@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>cvassylo - Massive Pixel Open World Co-op</title>
+    <title>cvassylo - Terraria Style Daylight Open World</title>
     <style>
         * {
             margin: 0;
@@ -14,8 +14,8 @@
         }
 
         body {
-            background-color: #030305;
-            color: #f8fafc;
+            background-color: #87CEEB;
+            color: #1e293b;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -25,26 +25,25 @@
 
         header {
             width: 100%;
-            background-color: #0a0a0f;
+            background-color: #ffffff;
             padding: 12px 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 3px solid #1e1b4b;
+            border-bottom: 3px solid #cbd5e1;
             z-index: 1000;
-            box-shadow: 0 4px 25px rgba(0,0,0,0.9);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
 
         .logo {
             font-size: 26px;
             font-weight: 900;
-            color: #38bdf8;
+            color: #0284c7;
             letter-spacing: 3px;
-            text-shadow: 0 0 12px rgba(56,189,248,0.6);
         }
 
         .logo span {
-            color: #f43f5e;
+            color: #16a34a;
         }
 
         .mode-container {
@@ -53,9 +52,9 @@
         }
 
         .mode-btn {
-            background-color: #1e1b4b;
-            color: #cbd5e1;
-            border: 2px solid #312e81;
+            background-color: #f1f5f9;
+            color: #475569;
+            border: 2px solid #cbd5e1;
             padding: 7px 16px;
             border-radius: 6px;
             cursor: pointer;
@@ -65,10 +64,10 @@
         }
 
         .mode-btn.active, .mode-btn:hover {
-            background-color: #38bdf8;
-            color: #030305;
-            border-color: #7dd3fc;
-            box-shadow: 0 0 15px rgba(56,189,248,0.7);
+            background-color: #0284c7;
+            color: #ffffff;
+            border-color: #0284c7;
+            box-shadow: 0 0 10px rgba(2,132,199,0.4);
         }
 
         main {
@@ -79,15 +78,15 @@
             justify-content: center;
             position: relative;
             width: 100%;
-            background: radial-gradient(circle at center, #0a0a12 0%, #030305 100%);
+            background: linear-gradient(to bottom, #87CEEB 0%, #e0f2fe 100%);
         }
 
         canvas {
-            background-color: #07070c;
+            background-color: #87CEEB;
             display: block;
-            border: 4px solid #1e1b4b;
+            border: 4px solid #0284c7;
             border-radius: 8px;
-            box-shadow: 0 15px 50px rgba(0,0,0,0.95);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
             image-rendering: pixelated;
             image-rendering: crisp-edges;
         }
@@ -96,14 +95,14 @@
             position: absolute;
             top: 20px;
             left: 30px;
-            background: rgba(10, 10, 18, 0.92);
+            background: rgba(255, 255, 255, 0.9);
             padding: 14px 22px;
-            border: 2px solid #312e81;
+            border: 2px solid #94a3b8;
             border-radius: 8px;
             font-size: 14px;
             pointer-events: none;
             line-height: 1.7;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.8);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             z-index: 100;
         }
 
@@ -111,30 +110,19 @@
             position: absolute;
             bottom: 14px;
             font-size: 12px;
-            color: #64748b;
+            color: #334155;
             letter-spacing: 1px;
-            background: rgba(3,3,5,0.8);
+            background: rgba(255, 255, 255, 0.85);
             padding: 5px 15px;
             border-radius: 4px;
-        }
-
-        /* CRT Scanline Effect Overlay */
-        .crt-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.25) 50%), linear-gradient(90deg, rgba(255,0,0,0.03), rgba(0,255,0,0.01), rgba(0,0,255,0.03));
-            background-size: 100% 4px, 6px 100%;
-            pointer-events: none;
-            z-index: 500;
+            border: 1px solid #cbd5e1;
         }
     </style>
 </head>
 <body>
 
-    <div class="crt-overlay"></div>
-
     <header>
-        <div class="logo">cvassylo<span>.</span>world</div>
+        <div class="logo">cvassylo<span>.</span>terraria</div>
         <div class="mode-container">
             <button class="mode-btn active" onclick="switchMode(1)">1. Açık Dünya</button>
             <button class="mode-btn" onclick="switchMode(2)">2. NPC Kaçış</button>
@@ -152,7 +140,7 @@
 
     <script>
         // ==========================================
-        // 1. WEB AUDIO API - RETRO SOUND SYNTHESIZER
+        // 1. WEB AUDIO API - RETRO SOUNDS
         // ==========================================
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -168,62 +156,54 @@
 
             if (type === 'jump') {
                 osc.type = 'square';
-                osc.frequency.setValueAtTime(160, now);
-                osc.frequency.exponentialRampToValueAtTime(440, now + 0.18);
-                gain.gain.setValueAtTime(0.12, now);
-                gain.gain.linearRampToValueAtTime(0, now + 0.18);
-                osc.start(now); osc.stop(now + 0.18);
+                osc.frequency.setValueAtTime(180, now);
+                osc.frequency.exponentialRampToValueAtTime(450, now + 0.15);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.15);
+                osc.start(now); osc.stop(now + 0.15);
             } else if (type === 'coin') {
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(580, now);
-                osc.frequency.setValueAtTime(880, now + 0.08);
-                gain.gain.setValueAtTime(0.15, now);
-                gain.gain.linearRampToValueAtTime(0, now + 0.22);
-                osc.start(now); osc.stop(now + 0.22);
+                osc.frequency.setValueAtTime(600, now);
+                osc.frequency.setValueAtTime(950, now + 0.08);
+                gain.gain.setValueAtTime(0.12, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.2);
+                osc.start(now); osc.stop(now + 0.2);
             } else if (type === 'hit') {
                 osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(140, now);
-                osc.frequency.linearRampToValueAtTime(45, now + 0.25);
-                gain.gain.setValueAtTime(0.2, now);
-                gain.gain.linearRampToValueAtTime(0, now + 0.25);
-                osc.start(now); osc.stop(now + 0.25);
-            } else if (type === 'car') {
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(90, now);
-                osc.frequency.linearRampToValueAtTime(130, now + 0.12);
-                gain.gain.setValueAtTime(0.1, now);
-                gain.gain.linearRampToValueAtTime(0, now + 0.12);
-                osc.start(now); osc.stop(now + 0.12);
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.linearRampToValueAtTime(50, now + 0.2);
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.2);
+                osc.start(now); osc.stop(now + 0.2);
             }
         }
 
         // ==========================================
-        // 2. CANVAS & GLOBAL CONFIGURATION
+        // 2. CANVAS & WORLD CONFIGURATION
         // ==========================================
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
         ctx.imageSmoothingEnabled = false;
 
-        const WORLD_WIDTH = 7000;  // Devasa Geniş Harita
-        const WORLD_HEIGHT = 1600; // Geniş Dikey Alan (Yüksek binalar/dağlar)
+        const WORLD_WIDTH = 7000;
+        const WORLD_HEIGHT = 1600;
         const GRAVITY = 0.55;
 
         let gameMode = 1;
         let gameScore = 0;
         let lavaY = WORLD_HEIGHT + 300;
-        let frameCount = 0;
 
         // Particle System
         let particles = [];
-        function spawnParticles(x, y, color, count = 10) {
+        function spawnParticles(x, y, color, count = 8) {
             for (let i = 0; i < count; i++) {
                 particles.push({
                     x: x, y: y,
-                    vx: (Math.random() - 0.5) * 6,
-                    vy: (Math.random() - 0.5) * 6,
-                    life: 30 + Math.random() * 20,
+                    vx: (Math.random() - 0.5) * 5,
+                    vy: (Math.random() - 0.5) * 5,
+                    life: 25 + Math.random() * 15,
                     color: color,
-                    size: 3 + Math.random() * 4
+                    size: 3 + Math.random() * 3
                 });
             }
         }
@@ -239,90 +219,75 @@
         window.addEventListener('keyup', e => { keys[e.code] = false; });
 
         // ==========================================
-        // 3. ENTITIES & MASSIVE WORLD GENERATION
+        // 3. PLAYERS & TERRARIA STYLE ENVIRONMENT
         // ==========================================
         const p1 = {
             x: 200, y: 1200, w: 26, h: 40, vx: 0, vy: 0,
-            speed: 4.5, jumpForce: -13, grounded: false, color: '#38bdf8',
+            speed: 4.5, jumpForce: -13, grounded: false, color: '#0284c7',
             hp: 3, inVehicle: null, facing: 1, name: 'P1'
         };
 
         const p2 = {
             x: 260, y: 1200, w: 26, h: 40, vx: 0, vy: 0,
-            speed: 4.5, jumpForce: -13, grounded: false, color: '#10b981',
+            speed: 4.5, jumpForce: -13, grounded: false, color: '#16a34a',
             hp: 3, inVehicle: null, facing: 1, name: 'P2'
         };
 
-        // Harita Yapıları: Zemin, Küçük Evler, Gökdelenler, Platformlar
+        // Terraria tarzı arazi: Zemin, Çim tepeler, Şirin evler ve geçilebilir platformlar
         const platforms = [];
-        // Ana Zemin
-        platforms.push({ x: 0, y: 1400, w: WORLD_WIDTH, h: 200, type: 'ground', color: '#0f172a' });
+        platforms.push({ x: 0, y: 1400, w: WORLD_WIDTH, h: 200, type: 'ground', color: '#15803d' });
 
-        // Rastgele küçük evler, büyük gökdelenler ve platformlar ekleme (1000+ satırlık detaylı harita)
-        for (let i = 300; i < WORLD_WIDTH - 400; i += 320) {
-            let isSmallHouse = (i % 640 === 0);
-            if (isSmallHouse) {
-                // Küçük Ev
-                let hWidth = 160;
-                let hHeight = 120;
-                platforms.push({ x: i, y: 1400 - hHeight, w: hWidth, h: hHeight, type: 'house', color: '#334155', roof: '#ef4444' });
+        // Tepeler, şirin evler ve doğal platformlar
+        for (let i = 300; i < WORLD_WIDTH - 400; i += 380) {
+            let isHouse = (i % 760 === 0);
+            if (isHouse) {
+                // Şirin Ahşap Ev (Üzerine zıplanabilir, engellemez)
+                platforms.push({ x: i, y: 1300, w: 140, h: 100, type: 'house', color: '#b45309', roof: '#dc2626' });
             } else {
-                // Gökdelen / Bina
-                let bWidth = 240;
-                let bHeight = 300 + ((i * 13) % 450);
-                platforms.push({ x: i, y: 1400 - bHeight, w: bWidth, h: bHeight, type: 'building', color: '#1e293b', trim: '#475569' });
-                
-                // Ara platformlar ve merdivenler
-                platforms.push({ x: i - 80, y: 1400 - bHeight - 100, w: 120, h: 18, type: 'platform', color: '#475569' });
-                platforms.push({ x: i + bWidth - 40, y: 1400 - bHeight - 200, w: 140, h: 18, type: 'platform', color: '#475569' });
+                // Doğal Toprak/Çimen Tepesi veya Platform
+                let pWidth = 200 + ((i * 7) % 100);
+                platforms.push({ x: i, y: 1400 - 60 - ((i * 11) % 120), w: pWidth, h: 25, type: 'platform', color: '#16a34a' });
             }
         }
 
-        // Gökyüzünde dolaşan devasa platform zincirleri
-        for (let i = 150; i < WORLD_WIDTH; i += 280) {
-            platforms.push({ x: i, y: 400 + ((i * 7) % 500), w: 160, h: 20, type: 'platform', color: '#334155' });
+        // Gökyüzü bulut üstü adacıklar
+        for (let i = 200; i < WORLD_WIDTH; i += 350) {
+            platforms.push({ x: i, y: 500 + ((i * 13) % 400), w: 150, h: 20, type: 'platform', color: '#ca8a04' });
         }
 
-        // Sürülebilir Araçlar (F ve G tuşu ile binilen)
+        // Sürülebilir Araba/Bugi
         const vehicles = [
-            { x: 800, y: 1360, w: 80, h: 40, vx: 0, speed: 7, color: '#f43f5e', driver: null },
-            { x: 2200, y: 1360, w: 80, h: 40, vx: 0, speed: 7, color: '#eab308', driver: null },
-            { x: 4100, y: 1360, w: 80, h: 40, vx: 0, speed: 7, color: '#a855f7', driver: null },
-            { x: 5800, y: 1360, w: 80, h: 40, vx: 0, speed: 7, color: '#06b6d4', driver: null }
+            { x: 700, y: 1360, w: 70, h: 35, vx: 0, speed: 6, color: '#ea580c', driver: null },
+            { x: 2500, y: 1360, w: 70, h: 35, vx: 0, speed: 6, color: '#9333ea', driver: null }
         ];
 
-        // NPC'ler, Düşmanlar ve Zombiler
+        // NPC ve Zombiler
         const entities = [];
-        for (let i = 0; i < 45; i++) {
+        for (let i = 0; i < 30; i++) {
             entities.push({
-                x: 400 + i * 140,
+                x: 400 + i * 180,
                 y: 1360,
                 w: 26, h: 40,
-                vx: (Math.random() - 0.5) * 2.2,
-                type: (i % 3 === 0) ? 'enemy' : 'npc',
-                name: 'Yurttaş #' + i,
+                vx: (Math.random() - 0.5) * 2,
+                type: (i % 2 === 0) ? 'enemy' : 'npc',
                 hp: 2
             });
         }
 
-        // Altın Çantaları ve Nesneler
+        // Altın Paralar
         const coins = [];
-        for (let i = 250; i < WORLD_WIDTH - 200; i += 180) {
-            coins.push({ x: i, y: 350 + ((i * 11) % 800), collected: false });
+        for (let i = 250; i < WORLD_WIDTH - 200; i += 200) {
+            coins.push({ x: i, y: 450 + ((i * 9) % 700), collected: false });
         }
 
-        // Çevresel Dekoratif Objeler (Ağaçlar, Sokak Lambaları, Kutular)
+        // Ağaçlar ve Çiçekler (Dekoratif)
         const decorations = [];
-        for (let i = 100; i < WORLD_WIDTH; i += 200) {
-            decorations.push({
-                x: i + Math.random() * 50,
-                y: 1400,
-                type: (i % 4 === 0) ? 'tree' : ((i % 4 === 1) ? 'lamp' : 'crate')
-            });
+        for (let i = 150; i < WORLD_WIDTH; i += 220) {
+            decorations.push({ x: i + Math.random() * 40, y: 1400, type: (i % 2 === 0) ? 'tree' : 'flower' });
         }
 
         // ==========================================
-        // 4. GAME MODES & SYSTEM LOGIC
+        // 4. GAME MODES & SYSTEM
         // ==========================================
         function switchMode(mode) {
             gameMode = mode;
@@ -341,24 +306,22 @@
 
         function interactVehicle(player) {
             if (player.inVehicle) {
-                player.x = player.inVehicle.x + 90;
+                player.x = player.inVehicle.x + 80;
                 player.y = player.inVehicle.y;
                 player.inVehicle.driver = null;
                 player.inVehicle = null;
-                playSound('car');
             } else {
                 vehicles.forEach(v => {
                     if (!v.driver && Math.hypot(v.x - player.x, v.y - player.y) < 70) {
                         v.driver = player;
                         player.inVehicle = v;
-                        playSound('car');
                     }
                 });
             }
         }
 
         // ==========================================
-        // 5. PHYSICS & COLLISION DETECTION
+        // 5. PHYSICS & COLLISIONS
         // ==========================================
         function rectIntersect(r1, r2) {
             return r1.x < r2.x + r2.w && r1.x + r1.w > r2.x &&
@@ -368,8 +331,8 @@
         function updatePlayer(p, leftKey, rightKey, jumpKey) {
             if (p.inVehicle) {
                 let v = p.inVehicle;
-                if (keys[leftKey]) { v.x -= v.speed; v.facing = -1; playSound('car'); spawnParticles(v.x + v.w, v.y + v.h, '#64748b', 1); }
-                if (keys[rightKey]) { v.x += v.speed; v.facing = 1; playSound('car'); spawnParticles(v.x, v.y + v.h, '#64748b', 1); }
+                if (keys[leftKey]) { v.x -= v.speed; v.facing = -1; }
+                if (keys[rightKey]) { v.x += v.speed; v.facing = 1; }
                 p.x = v.x + v.w / 2;
                 p.y = v.y - 12;
                 return;
@@ -381,7 +344,7 @@
 
             p.x += p.vx;
             platforms.forEach(plat => {
-                if (rectIntersect(p, plat)) {
+                if (plat.type !== 'house' && rectIntersect(p, plat)) {
                     if (p.vx > 0) p.x = plat.x - p.w;
                     else if (p.vx < 0) p.x = plat.x + plat.w;
                 }
@@ -393,13 +356,10 @@
 
             platforms.forEach(plat => {
                 if (rectIntersect(p, plat)) {
-                    if (p.vy > 0) {
+                    if (p.vy > 0 && p.y + p.h - p.vy <= plat.y + 10) {
                         p.y = plat.y - p.h;
                         p.vy = 0;
                         p.grounded = true;
-                    } else if (p.vy < 0) {
-                        p.y = plat.y + plat.h;
-                        p.vy = 0;
                     }
                 }
             });
@@ -422,51 +382,44 @@
         }
 
         // ==========================================
-        // 6. GAME UPDATE LOOP
+        // 6. UPDATE LOOP
         // ==========================================
         function update() {
-            frameCount++;
-
-            // Mode 3: Yükselen Lav
             if (gameMode === 3) {
-                lavaY -= 0.45;
-                if (p1.y > lavaY) { p1.hp--; p1.y = 200; playSound('hit'); updateHUD(); }
-                if (p2.y > lavaY) { p2.hp--; p2.y = 200; playSound('hit'); updateHUD(); }
+                lavaY -= 0.4;
+                if (p1.y > lavaY) { p1.hp--; p1.y = 300; playSound('hit'); updateHUD(); }
+                if (p2.y > lavaY) { p2.hp--; p2.y = 300; playSound('hit'); updateHUD(); }
             }
 
-            // Update Players
             updatePlayer(p1, 'KeyA', 'KeyD', 'Space');
             updatePlayer(p2, 'ArrowLeft', 'ArrowRight', 'ArrowUp');
 
-            // Update Entities / NPCs / Zombies
             entities.forEach(en => {
                 en.x += en.vx;
-                if (en.x < 150 || en.x > WORLD_WIDTH - 150) en.vx *= -1;
+                if (en.x < 100 || en.x > WORLD_WIDTH - 100) en.vx *= -1;
 
                 if (gameMode === 2 || gameMode === 5) {
                     let target = Math.hypot(p1.x - en.x, p1.y - en.y) < Math.hypot(p2.x - en.x, p2.y - en.y) ? p1 : p2;
-                    if (en.x < target.x) en.x += 1.4;
-                    else en.x -= 1.4;
+                    if (en.x < target.x) en.x += 1.3;
+                    else en.x -= 1.3;
 
                     if (rectIntersect(p1, en)) { p1.hp -= 0.04; updateHUD(); }
                     if (rectIntersect(p2, en)) { p2.hp -= 0.04; updateHUD(); }
                 }
             });
 
-            // Update Coins / Gold Bags (Mode 4)
             coins.forEach(c => {
                 if (!c.collected) {
                     if (Math.hypot(p1.x - c.x, p1.y - c.y) < 28 || Math.hypot(p2.x - c.x, p2.y - c.y) < 28) {
                         c.collected = true;
                         gameScore += 10;
                         playSound('coin');
-                        spawnParticles(c.x, c.y, '#facc15', 8);
+                        spawnParticles(c.x, c.y, '#eab308', 8);
                         updateHUD();
                     }
                 }
             });
 
-            // Update Particles
             particles.forEach((pt, idx) => {
                 pt.x += pt.vx;
                 pt.y += pt.vy;
@@ -476,12 +429,11 @@
         }
 
         // ==========================================
-        // 7. RENDER ENGINE (PIXEL ART / UNDERTALE VIBE)
+        // 7. RENDER ENGINE (DAYLIGHT TERRARIA VIBE)
         // ==========================================
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Camera tracking (Center between P1 and P2)
             let camX = (p1.x + p2.x) / 2 - canvas.width / 2;
             let camY = (p1.y + p2.y) / 2 - canvas.height / 2;
 
@@ -491,103 +443,86 @@
             ctx.save();
             ctx.translate(-camX, -camY);
 
-            // Background Night Sky Gradient
-            ctx.fillStyle = '#05050a';
+            // Gündüz Gökyüzü ve Güneş
+            ctx.fillStyle = '#87CEEB';
             ctx.fillRect(camX, camY, canvas.width, canvas.height);
 
-            // Draw Parallax Stars
-            ctx.fillStyle = '#38bdf8';
-            for (let i = 0; i < 120; i++) {
-                let sx = (i * 317) % WORLD_WIDTH;
-                let sy = (i * 199) % 800;
-                ctx.fillRect(sx, sy, 2, 2);
+            // Parlayan Güneş
+            ctx.fillStyle = '#fde047';
+            ctx.beginPath(); ctx.arc(camX + 900, camY + 120, 50, 0, Math.PI*2); ctx.fill();
+
+            // Hareketli Bulutlar
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            for (let i = 0; i < 40; i++) {
+                let cx = (i * 450) % WORLD_WIDTH;
+                let cy = 80 + (i * 70) % 250;
+                ctx.fillRect(cx, cy, 90, 35);
+                ctx.fillRect(cx + 20, cy - 15, 50, 25);
             }
 
-            // Draw Platforms, Houses and Buildings
+            // Platformlar ve Zeminler
             platforms.forEach(plat => {
                 ctx.fillStyle = plat.color;
                 ctx.fillRect(plat.x, plat.y, plat.w, plat.h);
-
                 if (plat.type === 'house') {
-                    // Ev çatısı
+                    // Çatı
                     ctx.fillStyle = plat.roof;
                     ctx.beginPath();
                     ctx.moveTo(plat.x - 10, plat.y);
-                    ctx.lineTo(plat.x + plat.w / 2, plat.y - 45);
+                    ctx.lineTo(plat.x + plat.w/2, plat.y - 50);
                     ctx.lineTo(plat.x + plat.w + 10, plat.y);
                     ctx.fill();
-                    // Ev kapısı ve pencereler
-                    ctx.fillStyle = '#1e293b';
+                    // Kapı
+                    ctx.fillStyle = '#78350f';
                     ctx.fillRect(plat.x + plat.w/2 - 15, plat.y + plat.h - 40, 30, 40);
-                    ctx.fillStyle = '#fbbf24';
-                    ctx.fillRect(plat.x + 20, plat.y + 25, 25, 25);
-                    ctx.fillRect(plat.x + plat.w - 45, plat.y + 25, 25, 25);
-                } else if (plat.type === 'building') {
-                    ctx.fillStyle = plat.trim || '#334155';
-                    ctx.fillRect(plat.x, plat.y, plat.w, 12);
-                    // Pencereler gridi
-                    ctx.fillStyle = '#38bdf8';
-                    for (let wx = plat.x + 20; wx < plat.x + plat.w - 25; wx += 40) {
-                        for (let wy = plat.y + 30; wy < plat.y + plat.h - 30; wy += 50) {
-                            ctx.fillRect(wx, wy, 20, 30);
-                        }
-                    }
                 }
             });
 
-            // Draw Environmental Decorations (Trees, Lamps, Crates)
+            // Dekoratif Ağaçlar ve Çiçekler
             decorations.forEach(dec => {
                 if (dec.type === 'tree') {
-                    ctx.fillStyle = '#78350f'; // Gövde
-                    ctx.fillRect(dec.x, dec.y - 50, 16, 50);
-                    ctx.fillStyle = '#15803d'; // Yapraklar
-                    ctx.beginPath(); ctx.arc(dec.x + 8, dec.y - 65, 30, 0, Math.PI*2); ctx.fill();
-                } else if (dec.type === 'lamp') {
-                    ctx.fillStyle = '#475569';
-                    ctx.fillRect(dec.x, dec.y - 90, 8, 90);
-                    ctx.fillStyle = '#facc15'; // lamba ışığı
-                    ctx.beginPath(); ctx.arc(dec.x + 4, dec.y - 95, 10, 0, Math.PI*2); ctx.fill();
-                } else if (dec.type === 'crate') {
                     ctx.fillStyle = '#9a3412';
-                    ctx.fillRect(dec.x, dec.y - 30, 30, 30);
-                    ctx.strokeStyle = '#c2410c'; ctx.lineWidth = 2;
-                    ctx.strokeRect(dec.x, dec.y - 30, 30, 30);
+                    ctx.fillRect(dec.x, dec.y - 60, 14, 60);
+                    ctx.fillStyle = '#16a34a';
+                    ctx.beginPath(); ctx.arc(dec.x + 7, dec.y - 70, 28, 0, Math.PI*2); ctx.fill();
+                } else {
+                    ctx.fillStyle = '#ec4899';
+                    ctx.fillRect(dec.x, dec.y - 12, 10, 10);
                 }
             });
 
-            // Draw Coins / Gold
-            ctx.fillStyle = '#facc15';
+            // Altın Paralar
+            ctx.fillStyle = '#eab308';
             coins.forEach(c => {
                 if (!c.collected) {
-                    ctx.fillRect(c.x - 7, c.y - 7, 14, 14);
+                    ctx.fillRect(c.x - 6, c.y - 6, 12, 12);
                     ctx.fillStyle = '#fef08a';
-                    ctx.fillRect(c.x - 3, c.y - 3, 6, 6);
-                    ctx.fillStyle = '#facc15';
+                    ctx.fillRect(c.x - 2, c.y - 2, 4, 4);
+                    ctx.fillStyle = '#eab308';
                 }
             });
 
-            // Draw Vehicles
+            // Araçlar
             vehicles.forEach(v => {
                 ctx.fillStyle = v.color;
                 ctx.fillRect(v.x, v.y, v.w, v.h);
-                ctx.fillStyle = '#0f172a'; // Ön cam
-                ctx.fillRect(v.x + 18, v.y - 12, 35, 14);
-                // Tekerlekler
+                ctx.fillStyle = '#bae6fd';
+                ctx.fillRect(v.x + 15, v.y - 10, 30, 12);
                 ctx.fillStyle = '#000';
-                ctx.fillRect(v.x + 10, v.y + v.h - 4, 14, 10);
-                ctx.fillRect(v.x + v.w - 24, v.y + v.h - 4, 14, 10);
+                ctx.fillRect(v.x + 8, v.y + v.h - 4, 12, 10);
+                ctx.fillRect(v.x + v.w - 20, v.y + v.h - 4, 12, 10);
             });
 
-            // Draw NPCs / Enemies
+            // NPC / Zombiler
             entities.forEach(en => {
-                ctx.fillStyle = (gameMode === 5) ? '#22c55e' : '#cbd5e1';
+                ctx.fillStyle = (gameMode === 5) ? '#15803d' : '#64748b';
                 ctx.fillRect(en.x, en.y, en.w, en.h);
-                ctx.fillStyle = '#000'; // Gözler
-                ctx.fillRect(en.x + 6, en.y + 10, 5, 5);
-                ctx.fillRect(en.x + 15, en.y + 10, 5, 5);
+                ctx.fillStyle = '#000';
+                ctx.fillRect(en.x + 6, en.y + 10, 4, 4);
+                ctx.fillRect(en.x + 16, en.y + 10, 4, 4);
             });
 
-            // Draw Player 1
+            // Oyuncu 1
             if (!p1.inVehicle) {
                 ctx.fillStyle = p1.color;
                 ctx.fillRect(p1.x, p1.y, p1.w, p1.h);
@@ -598,7 +533,7 @@
                 ctx.fillText('P1', p1.x + 4, p1.y - 6);
             }
 
-            // Draw Player 2
+            // Oyuncu 2
             if (!p2.inVehicle) {
                 ctx.fillStyle = p2.color;
                 ctx.fillRect(p2.x, p2.y, p2.w, p2.h);
@@ -609,18 +544,18 @@
                 ctx.fillText('P2', p2.x + 4, p2.y - 6);
             }
 
-            // Draw Particles
+            // Parçacıklar
             particles.forEach(pt => {
                 ctx.fillStyle = pt.color;
                 ctx.fillRect(pt.x, pt.y, pt.size, pt.size);
             });
 
-            // Draw Rising Lava (Mode 3)
+            // Yükselen Lav (Mod 3)
             if (gameMode === 3) {
-                ctx.fillStyle = 'rgba(239, 68, 68, 0.92)';
+                ctx.fillStyle = 'rgba(239, 68, 68, 0.9)';
                 ctx.fillRect(0, lavaY, WORLD_WIDTH, WORLD_HEIGHT - lavaY);
                 ctx.fillStyle = '#fca5a5';
-                ctx.fillRect(0, lavaY, WORLD_WIDTH, 10);
+                ctx.fillRect(0, lavaY, WORLD_WIDTH, 8);
             }
 
             ctx.restore();
